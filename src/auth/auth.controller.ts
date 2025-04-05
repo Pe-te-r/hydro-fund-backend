@@ -1,11 +1,13 @@
 import type { Context } from "hono";
+import { registerService } from "./auth.service.js";
 
 export const register_controller = async (c: Context) => {
     try {
         const data = c.req.addValidatedData
-        console.log(data)
-        return c.json({"status":'success',"message":"the user is registered success", data })
-    } catch {
+        const result= await registerService(data)
+        return c.json({"status":'success',"message":"the user is registered success", "data":result })
+    } catch (error) {
+        console.log(error)
         return c.json({ 'error':'error'})
     }
 }

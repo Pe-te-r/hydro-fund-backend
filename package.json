@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.0",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.41.0",
     "hono": "^4.7.5",

@@ -3,9 +3,20 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "username":"phantom",
+    "username":"john",
     "phone":"0768543269",
     "email":"phantom8526@duck.com",
     "password":"1234",
-    "referral":"peter"
+    "inviteCode":"peter"
+}
+
+###
+
+
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "phone":"0768543269",
+    "password":"1234"
 }

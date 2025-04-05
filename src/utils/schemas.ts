@@ -5,7 +5,7 @@ export const registerSchema = z.object({
     phone:z.string(),
     email: z.string().email(),
     password: z.string(),
-    referral:z.string().optional()
+    inviteCode:z.string().optional()
     
 });
 

@@ -1,8 +1,8 @@
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 const saltRounds = 12; // Higher is more secure but slower
 
 // Hash a password
-async function hashPassword(plainPassword:string) {
+export async function hashPassword(plainPassword:string) {
     try {
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(plainPassword, salt);
@@ -13,7 +13,7 @@ async function hashPassword(plainPassword:string) {
 }
 
 // Verify a password
-async function verifyPassword(plainPassword:string, hashedPassword:string) {
+export async function verifyPassword(plainPassword:string, hashedPassword:string) {
     try {
         const match = await bcrypt.compare(plainPassword, hashedPassword);
         return match;

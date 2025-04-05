@@ -1,0 +1,9 @@
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "username":"phantom",
+    "phone":"0768543269",
+    "email":"phantom8526@duck.com",
+    "password":"1234"
+}

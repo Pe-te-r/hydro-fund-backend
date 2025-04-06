@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const users = pgTable('users', {
@@ -6,7 +6,8 @@ export const users = pgTable('users', {
     username: text('username').notNull(),
     email: varchar('email', { length: 256 }).notNull(),
     inviteCode: text('invite_code'),
-    phone: varchar('phone', { length: 256 }).notNull()
+    phone: varchar('phone', { length: 256 }).notNull(),
+    blocked:boolean('blocked').default(false)
 });
 
 export const passwords = pgTable('passwords', {

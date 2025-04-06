@@ -3,10 +3,13 @@ import { Hono } from 'hono'
 import { users_api } from './users/users.route.js'
 import { auth_api } from './auth/auth.route.js'
 import 'dotenv/config'
+import { cors } from 'hono/cors'
 
 
 
 const app = new Hono()
+
+app.use('/*', cors())
 
 app.route('/',auth_api)
 app.route('/',users_api)

@@ -1,38 +1,40 @@
 import type { Context } from "hono";
 import { correct_password, email_exits, phone_exits, registerService, username_exits } from "./auth.service.js";
-import type { SelectUser } from "../db/schema.js";
+// import type { SelectUser } from "../db/schema.js";
 import { generateUserToken } from "../utils/auth.js";
 
 export const register_controller = async (c: Context) => {
     try {
         const data = c.req.addValidatedData
-        const conflicts: string[] = [];
+        console.log(data)
+        return c.json({status:'success',data})
+        // const conflicts: string[] = [];
 
         // Check each field and collect conflicts
-        if ('email' in data && await email_exits(String(data.email))) {
-            conflicts.push('email');
-        }
-        if ('phone' in data && await phone_exits(String(data.phone))) {
-            conflicts.push('phone');
-        }
-        if ('username' in data && await username_exits(String(data.username))) {
-            conflicts.push('username');
-        }
+        // if ('email' in data && await email_exits(String(data.email))) {
+        //     conflicts.push('email');
+        // }
+        // if ('phone' in data && await phone_exits(String(data.phone))) {
+        //     conflicts.push('phone');
+        // }
+        // if ('username' in data && await username_exits(String(data.username))) {
+        //     conflicts.push('username');
+        // }
 
-        if (conflicts.length > 0) {
-            return c.json({
-                status: 'error',
-                message: `${conflicts.join(', ')} already exists`,
-                error: { conflicts } 
-            }, 409);
-        }
+        // if (conflicts.length > 0) {
+        //     return c.json({
+        //         status: 'error',
+        //         message: `${conflicts.join(', ')} already exists`,
+        //         error: { conflicts } 
+        //     }, 409);
+        // }
 
-        const result = await registerService(data);
-        return c.json({
-            status: 'success',
-            message: "User registered successfully",
-            data: result
-        }, 201);
+        // const result = await registerService(data);
+        // return c.json({
+        //     status: 'success',
+        //     message: "User registered successfully",
+        //     data: result
+        // }, 201);
 
     } catch (error) {
         console.log(error)

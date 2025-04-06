@@ -6,7 +6,7 @@ export const users = pgTable('users', {
     username: text('username').notNull(),
     email: varchar('email', { length: 256 }).notNull(),
     inviteCode: text('invite_code'),
-    phone: varchar('phone', { length: 256 })
+    phone: varchar('phone', { length: 256 }).notNull()
 });
 
 export const passwords = pgTable('passwords', {
@@ -18,6 +18,7 @@ export const referrals = pgTable('referrals', {
     userId: uuid('id').primaryKey().references(() => users.id),
     referralCode: text('referral_code').notNull()
 });
+
 export const usersRelations = relations(users, ({ one }) => ({
     password: one(passwords, {
         fields: [users.id],

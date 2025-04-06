@@ -35,7 +35,7 @@ export const email_exits = async (email:string) => {
             where:eq(users.email,email)
         })
     } catch (error) {
-        return false
+        return null
     }
 }
 
@@ -46,7 +46,7 @@ export const phone_exits = async (phone: string) => {
             where: eq(users.phone, phone)
         })
     } catch (error) {
-        return false
+        return null
     }
 }
 
@@ -56,7 +56,7 @@ export const username_exits = async (username: string) => {
             where: eq(users.username, username)
         })
     } catch (error) {
-        return false
+        return null
     }
 }
 

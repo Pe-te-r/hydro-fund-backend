@@ -42,7 +42,7 @@ export const register_controller = async (c: Context) => {
 export const login_controller = async (c: Context) => {c
     try {
         const data = c.req.addValidatedData
-        let user_exits = null;
+        let user_exits=null;
 
         if ('email' in data) {
             user_exits = await email_exits(String(data['email']))    
@@ -56,7 +56,7 @@ export const login_controller = async (c: Context) => {c
         if (!user_exits) {
             return c.json({'status':'error','message':'user not found'},404)
         }
-        if ('password' in data && user_exits && await correct_password(String(user_exits.id), String(data['password']))) {
+        if ('password' in data && user_exits &&  await correct_password(String(user_exits.id), String(data['password']))) {
             
             return c.json({"status":'success','message':'success login', user_exits })
         }

@@ -63,7 +63,6 @@ export const username_exits = async (username: string) => {
 export const correct_password = async (id:any,password:string) => {
     try {
         const password_value = await db.select().from(passwords).where(eq(passwords.userId,id))
-        console.log(password_value)
 
         if (password_value[0]) {
             return verifyPassword(password,password_value[0]?.password)

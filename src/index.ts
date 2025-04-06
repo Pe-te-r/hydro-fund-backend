@@ -2,6 +2,9 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { users_api } from './users/users.route.js'
 import { auth_api } from './auth/auth.route.js'
+import 'dotenv/config'
+
+
 
 const app = new Hono()
 

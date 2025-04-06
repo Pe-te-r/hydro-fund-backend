@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import { correct_password, email_exits, phone_exits, registerService, username_exits } from "./auth.service.js";
 import type { SelectUser } from "../db/schema.js";
+import { generateUserToken } from "../utils/auth.js";
 
 export const register_controller = async (c: Context) => {
     try {
@@ -56,13 +57,15 @@ export const login_controller = async (c: Context) => {c
         if (!user_exits) {
             return c.json({'status':'error','message':'user not found'},404)
         }
-        if ('password' in data && user_exits &&  await correct_password(String(user_exits.id), String(data['password']))) {
+        if ('password' in data && user_exits && await correct_password(String(user_exits.id), String(data['password']))) {
             
-            return c.json({"status":'success','message':'success login', user_exits })
+            const token = generateUserToken(user_exits.id,user_exits.email)
+            
+            return c.json({ "status": 'success', 'message': 'success login', data: { user:user_exits ,token}, })
         }
-        return c.json(user_exits)
-    } catch {
-        
+        return c.json({status:'error','message':'wrong password'})
+    } catch(error) {
+        console.log(error)
         return c.json({ 'error':'error'})
     }
 }

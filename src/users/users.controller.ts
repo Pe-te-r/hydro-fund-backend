@@ -25,7 +25,6 @@ export const userController = async (c: Context) => {
         }
 
         const user = await OneUserService(id)
-        console.log(user)
         if (!user) {
             return c.json({'status':'error','message':'user not found'})
         }

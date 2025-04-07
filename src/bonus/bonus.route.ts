@@ -1,6 +1,7 @@
 import { Hono } from "hono";
-import { ClaimBonusController } from "./bonus.controller.js";
+import { AccountBonusController, ClaimBonusController } from "./bonus.controller.js";
 
 export const bonusApi = new Hono().basePath('/bonus')
 
-bonusApi.patch('/:id', ClaimBonusController)
+bonusApi.patch('/new/:id', ClaimBonusController)
+bonusApi.patch('/account/:id', AccountBonusController)

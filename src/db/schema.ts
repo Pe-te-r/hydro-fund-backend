@@ -3,10 +3,10 @@ import { relations } from "drizzle-orm";
 
 // Enums for various status and type fields
 export const userStatusEnum = pgEnum('user_status', ['active', 'blocked', 'suspended']);
-export const vipTierEnum = pgEnum('vip_tier', ['bronze', 'silver', 'gold', 'platinum']);
+export const vipTierEnum = pgEnum('vip_tier', ['standard','bronze', 'silver', 'gold', 'platinum']);
 export const paymentMethodEnum = pgEnum('payment_method', ['mpesa', 'paypal', 'crypto', 'bank_transfer']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withdrawal', 'fee', 'bonus', 'investment', 'earning']);
-export const transactionStatusEnum = pgEnum('transaction_status', ['pending', 'completed', 'failed', 'reversed']);
+export const transactionStatusEnum = pgEnum('transaction_status', ['pending',"expired" ,'completed', 'failed', 'reversed']);
 export const investmentStatusEnum = pgEnum('investment_status', ['active', 'completed', 'cancelled', 'pending']);
 export const orderStatusEnum = pgEnum('order_status', ['pending', 'processing', 'completed', 'cancelled']);
 export const alertSeverityEnum = pgEnum('alert_severity', ['low', 'medium', 'high', 'critical']);
@@ -45,6 +45,7 @@ export const referrals = pgTable('referrals', {
     bonusAmount: decimal('bonus_amount', { precision: 19, scale: 4 }).default('50'),
     bonusStatus: transactionStatusEnum('bonus_status').default('pending'),
     isSelfReferral: boolean('is_self_referral').default(false),
+    createdAt: timestamp('created_at').defaultNow(),
 });
 
 // Financial tables
@@ -91,6 +92,13 @@ export const investments = pgTable('investments', {
     productId: uuid('product_id'),
     transactionId: uuid('transaction_id').references(() => transactions.id),
 });
+
+export const newBonus = pgTable('bonus', {
+    userId: uuid('user_id').notNull().references(() => users.id),
+    status: transactionStatusEnum('status').default('pending'),
+    bonusAmount: decimal('bonus_amount', { precision: 19, scale: 4 }).default('50'),
+    createdAt: timestamp('created_at').defaultNow(),
+})
 
 // E-commerce tables
 export const products = pgTable('products', {
@@ -186,15 +194,21 @@ export const notifications = pgTable('notifications', {
 
 
 // Define relationships
+// users
 export const usersRelations = relations(users, ({ one, many }) => ({
     password: one(passwords, {
         fields: [users.id],
         references: [passwords.userId],
     }),
+    bonus: one(newBonus, {
+        fields: [users.id],
+        references: [newBonus.userId],
+    }),
     referredUsers: many(referrals, { relationName: 'referrer' }),
     referredBy: many(referrals, { relationName: 'referred' }),
 }));
 
+// password
 export const passwordsRelations = relations(passwords, ({ one }) => ({
     user: one(users, {
         fields: [passwords.userId],
@@ -202,6 +216,7 @@ export const passwordsRelations = relations(passwords, ({ one }) => ({
     }),
 }));
 
+// referrals
 export const referralsRelations = relations(referrals, ({ one }) => ({
     referrer: one(users, {
         fields: [referrals.referrerId],
@@ -215,3 +230,10 @@ export const referralsRelations = relations(referrals, ({ one }) => ({
     }),
 }));
 
+// bonus
+export const bonusRelations = relations(newBonus, ({ one }) => ({
+    user: one(users, {
+        fields: [newBonus.userId],
+        references: [users.id],
+    }),
+}));

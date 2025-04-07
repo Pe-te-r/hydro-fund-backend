@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db/db.js";
-import { passwords, referrals, users, vipTierEnum } from "../db/schema.js";
+import { newBonus, passwords, referrals, users, vipTierEnum } from "../db/schema.js";
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { generateReferralCode } from "../utils/referral_code.js";
 
@@ -32,7 +32,10 @@ export const registerService = async (user: {
                     password: await hashPassword(user.password),
                     lastChanged: new Date()
                 });
-
+            
+            // enable bonus
+            await tx.insert(newBonus).values({userId:newUser.id})
+            
             // Handle referral if inviteCode exists
             if (user.inviteCode) {
                 // First find the referrer by their referral code

@@ -44,6 +44,7 @@ export const referrals = pgTable('referrals', {
     referralCode: text('referral_code').notNull(),
     bonusAmount: decimal('bonus_amount', { precision: 19, scale: 4 }).default('50'),
     bonusStatus: transactionStatusEnum('bonus_status').default('pending'),
+    isSelfReferral: boolean('is_self_referral').default(false),
 });
 
 // Financial tables
@@ -183,29 +184,22 @@ export const notifications = pgTable('notifications', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-// Relations (expanded from previous version)
+
+// Define relationships
 export const usersRelations = relations(users, ({ one, many }) => ({
     password: one(passwords, {
         fields: [users.id],
         references: [passwords.userId],
     }),
-    sentReferrals: many(referrals, { relationName: 'sentReferrals' }),
-    receivedReferral: one(referrals, {
-        fields: [users.id],
-        references: [referrals.referredId],
-        relationName: 'receivedReferral'
+    referredUsers: many(referrals, { relationName: 'referrer' }),
+    referredBy: many(referrals, { relationName: 'referred' }),
+}));
+
+export const passwordsRelations = relations(passwords, ({ one }) => ({
+    user: one(users, {
+        fields: [passwords.userId],
+        references: [users.id],
     }),
-    transactions: many(transactions),
-    investments: many(investments),
-    orders: many(orders),
-    shoppingCart: many(shoppingCart),
-    leaderboard: one(leaderboard, {
-        fields: [users.id],
-        references: [leaderboard.userId],
-    }),
-    fraudAlerts: many(fraudAlerts),
-    resolvedAlerts: many(fraudAlerts, { relationName: 'resolvedAlerts' }),
-    notifications: many(notifications),
 }));
 
 export const referralsRelations = relations(referrals, ({ one }) => ({

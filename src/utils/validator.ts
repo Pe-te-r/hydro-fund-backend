@@ -4,11 +4,9 @@ import { z } from "zod";
 export function validate(schema: z.ZodSchema) {
     return async (c: Context, next: Next) => {
         try {
-            console.log('here')
             const data = await c.req.json();
-            console.log(data)
             const parsedData = schema.parse(data);
-            c.req.addValidatedData = parsedData; 
+            c.set('validatedData',parsedData); 
             await next();
         } catch (error) {
             if (error instanceof z.ZodError) {

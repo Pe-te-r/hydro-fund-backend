@@ -1,32 +1,81 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db/db.js";
-import { passwords, referrals, users } from "../db/schema.js";
+import { passwords, referrals, users, vipTierEnum } from "../db/schema.js";
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { generateReferralCode } from "../utils/referral_code.js";
 
-export const registerService = async (user: any) => {
+export const registerService = async (user: {
+    username: string;
+    email: string;
+    phone: string;
+    password: string;
+    inviteCode?: string;
+}) => {
     try {
         const result = await db.transaction(async (tx) => {
-            const new_user = await tx.insert(users).values(user).returning().execute();
+            // Create the user first
+            const [newUser] = await tx.insert(users)
+                .values({                    
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone,
+                    twoFactorSecret:null,
+                    lastLogin: new Date(),
+                    vipTier: 'bronze',
+                })
+                .returning();
+
+            // Create password record
             await tx.insert(passwords)
                 .values({
-                    userId: new_user[0].id,
-                    password: await hashPassword(user['password'])
+                    userId: newUser.id,
+                    password: await hashPassword(user.password),
+                    lastChanged: new Date()
                 });
 
-            await tx.insert(referrals)
-                .values({
-                    userId: new_user[0].id,
-                    referralCode: generateReferralCode()
+            // Handle referral if inviteCode exists
+            if (user.inviteCode) {
+                // First find the referrer by their referral code
+                const referrer = await tx.query.referrals.findFirst({
+                    where: eq(referrals.referralCode, user.inviteCode)
                 });
 
-            return new_user[0]; 
+                if (referrer) {
+                    // Create referral relationship
+                    await tx.insert(referrals)
+                        .values({
+                            referrerId: referrer.referrerId, // The user who referred
+                            referredId: newUser.id,         // The new user
+                            referralCode: generateReferralCode(), // For the new user to refer others
+                            bonusAmount: '50',              // Default bonus
+                            bonusStatus: 'pending'          // Default status
+                        });
+
+                    // Optional: Update referrer's bonus (if immediate)
+                    // await tx.update(users)...
+                }
+            } else {
+                // Still generate a referral code for the new user
+                await tx.insert(referrals)
+                    .values({
+                        referrerId: newUser.id, // Self-referral or no referrer
+                        referredId: newUser.id,
+                        referralCode: generateReferralCode(),
+                        bonusAmount: '0',      // No bonus for self
+                        bonusStatus: 'completed', // No pending bonus
+                        isSelfReferral:true
+                    });
+            }
+
+            return newUser;
         });
         return result;
     } catch (error) {
-        return false; 
+        console.error('Registration error:', error);
+        return false;
     }
-}
+};
+
 
 
 export const email_exits = async (email:string) => {

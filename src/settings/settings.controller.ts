@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
-import { settingsServiceGet } from "./settings.service.js";
+import { settingsServiceGet, updateUserSettings } from "./settings.service.js";
+import { OneUserService } from "../users/users.service.js";
 
 
 export const settingsController = async (c: Context) => {
@@ -36,10 +37,22 @@ export const updateSettings = async (c: Context) => {
                 { status: 'error', message: 'Invalid user ID format' }, 400
             );
         }
+
+        const user_exits = await OneUserService(id)
+        if (!user_exits) {
+            return c.json({status:'error',message:'user not found'})
+        }
+        const data = c.get('validatedData')
+
+        const results =await updateUserSettings(id,data)
         
-        return c.json({status:'error',message:'update was success'},200)
+        console.log()
+
+        if( results.success !== false)return c.json(results,403)
+        return c.json(results,200)
             
     } catch (error) {
+        // console.log(error)
         return c.json({status:'error',message:'unknow error occured'},500)
     }
 }

@@ -22,6 +22,7 @@ export const users = pgTable('users', {
     status: userStatusEnum('status').default('active'),
     balance: decimal('balance', { precision: 19, scale: 4 }).default('0'),
     twoFactorSecret: text('two_factor_secret'),
+    twoFactorEnabled: boolean('two_factor_secret_enable').default(false),
     vipTier: vipTierEnum('vip_tier'),
     totalInvested: decimal('total_invested', { precision: 19, scale: 4 }).default('0'),
     totalWithdrawn: decimal('total_withdrawn', { precision: 19, scale: 4 }).default('0'),

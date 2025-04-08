@@ -28,6 +28,7 @@ export const register_controller = async (c: Context) => {
         }
 
         const result = await registerService(data);
+        console.log(result)
         if (result) {
             
             return c.json({

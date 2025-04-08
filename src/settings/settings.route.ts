@@ -6,4 +6,4 @@ import { updateDetails } from "../utils/schemas.js";
 export const settingsApi = new Hono().basePath('/settings')
 
 settingsApi.get('/:id', settingsController)
-settingsApi.put('/:id', validate(updateDetails),  updateSettings)
+settingsApi.patch('/:id', validate(updateDetails),  updateSettings)

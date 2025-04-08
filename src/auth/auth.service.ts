@@ -3,6 +3,7 @@ import { db } from "../db/db.js";
 import { newBonus, passwords, referrals, users, vipTierEnum } from "../db/schema.js";
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { generateReferralCode } from "../utils/referral_code.js";
+import { generateTotpSecret } from "../utils/totp.js";
 
 export const registerService = async (user: {
     username: string;
@@ -19,7 +20,7 @@ export const registerService = async (user: {
                     username: user.username,
                     email: user.email,
                     phone: user.phone,
-                    twoFactorSecret:null,
+                    twoFactorSecret: generateTotpSecret(),
                     lastLogin: new Date(),
                     vipTier: 'standard',
                 })

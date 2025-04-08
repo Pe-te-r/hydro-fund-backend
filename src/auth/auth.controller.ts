@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import { correct_password, email_exits, phone_exits, registerService, username_exits } from "./auth.service.js";
+import { correct_password, email_exits, lastLoginUpdate, phone_exits, registerService, username_exits } from "./auth.service.js";
 // import type { SelectUser } from "../db/schema.js";
 import { generateUserToken } from "../utils/auth.js";
 
@@ -63,6 +63,8 @@ export const login_controller = async (c: Context) => {c
         }
         if ('password' in data && user_exits && await correct_password(String(user_exits.id), String(data['password']))) {
             
+            await lastLoginUpdate(user_exits.id)
+
             const token = generateUserToken(user_exits.id,user_exits.email)
             
             return c.json({ "status": 'success', 'message': 'success login', data: { user:user_exits ,token}, })

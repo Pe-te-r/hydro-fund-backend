@@ -21,7 +21,7 @@ export const registerService = async (user: {
                     phone: user.phone,
                     twoFactorSecret:null,
                     lastLogin: new Date(),
-                    vipTier: 'bronze',
+                    vipTier: 'standard',
                 })
                 .returning();
 
@@ -124,4 +124,8 @@ export const correct_password = async (id:any,password:string) => {
         return false
     }
 
+}
+
+export const lastLoginUpdate = async (id:string) => {
+    await db.update(users).set({lastLogin: new Date()}).where(eq(users.id,id)).returning().execute()
 }

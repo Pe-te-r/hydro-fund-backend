@@ -16,3 +16,13 @@ export const loginSchema = z.union([
 ]);
 
 
+export const updateDetails = z.object(
+    {
+        email: z.string().optional() ,
+        username: z.string().optional(),
+        phone: z.string().optional(),
+        twoFactoreSecret: z.string().optional(),
+        password: z.string().optional(),
+        code:z.string().optional(),
+    },
+)

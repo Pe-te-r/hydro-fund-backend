@@ -5,6 +5,7 @@ import { auth_api } from './auth/auth.route.js'
 import 'dotenv/config'
 import { cors } from 'hono/cors'
 import { bonusApi } from './bonus/bonus.route.js'
+import { settingsApi } from './settings/settings.route.js'
 
 
 
@@ -15,6 +16,7 @@ app.use('/*', cors())
 app.route('/',auth_api)
 app.route('/',users_api)
 app.route('/',bonusApi)
+app.route('/', settingsApi)
 
 
 

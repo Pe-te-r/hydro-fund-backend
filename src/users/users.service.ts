@@ -20,6 +20,7 @@ export const OneUserService = async (id: string) => {
                     referred: {
                         columns: {
                             email: true,
+                            id:true,
                         }
                     },
                 }

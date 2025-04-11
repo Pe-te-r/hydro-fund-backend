@@ -7,6 +7,7 @@ export const getDashBoardService = async (id: string) => {
     const user = await db.query.users.findFirst({
         where: eq(users.id, id),
         columns: {
+            username:true,
             balance: true,
             totalInvested: true,
             status: true,

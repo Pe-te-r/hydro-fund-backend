@@ -16,6 +16,9 @@ export const loginSchema = z.union([
 ]);
 
 
+export const sendEmailSchema = z.object({
+    id: z.string(),
+})
 
 export const updateDetails = z.object({
     email: z.string().email().optional(),
@@ -41,4 +44,6 @@ export interface updateData {
     username?: string
     phone?: string;
     code?: string;
+    twoFactorSecret?: string;
+    twoFactorEnabled?: boolean;
 }

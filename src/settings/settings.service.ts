@@ -35,6 +35,12 @@ return await db.transaction(async (tx) => {
         if (data.email) userUpdateData.email = data.email;
         if (data.username) userUpdateData.username = data.username;
         if (data.phone) userUpdateData.phone = data.phone;
+        if (data.twoFactorSecret) userUpdateData.twoFactorSecret = data.twoFactorSecret;
+        if (data.twoFactorEnabled) userUpdateData.twoFactorEnabled = data.twoFactorEnabled;
+        if (data.code) userUpdateData.code = data.code;
+
+
+        
         // Add other fields as needed
 
         // If password change is requested

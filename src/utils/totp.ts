@@ -26,3 +26,8 @@ export function verifyTotpCode(secret: string, token: string): boolean {
     return authenticator.check(token, secret);
 }
 
+
+export function generateRandomCode(): string {
+    const code = Math.floor(1000 + Math.random() * 9000);
+    return code.toString();
+}

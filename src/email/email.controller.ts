@@ -8,6 +8,7 @@ import { updateUserSettings } from "../settings/settings.service.js";
 export const send_email = async (c:Context) => {
     try {
         const id = c.req.param('id')
+        console.log(id)
         
         if (!isValidUUID(id)) {
             return c.json(

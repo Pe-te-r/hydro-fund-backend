@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { settingsServiceGet, updateUserSettings } from "./settings.service.js";
-import { OneUserService } from "../users/users.service.js";
+import {  OneUserServiceId } from "../users/users.service.js";
 
 
 export const settingsController = async (c: Context) => {
@@ -38,17 +38,20 @@ export const updateSettings = async (c: Context) => {
             );
         }
 
-        const user_exits = await OneUserService(id)
+        const user_exits = await OneUserServiceId(id)
+        console.log(user_exits)
+        console.log('one')
         if (!user_exits) {
-            return c.json({status:'error',message:'user not found'})
+            return c.json({status:'error',message:'user not found'},404)
         }
         const data = c.get('validatedData')
+        console.log(data)
 
-        const results =await updateUserSettings(id,data)
+        const results = await updateUserSettings(id, data)
+        console.log(results)
         
-        console.log()
 
-        if( results.success !== false)return c.json(results,403)
+        if( results.success === false)return c.json(results,403)
         return c.json(results,200)
             
     } catch (error) {

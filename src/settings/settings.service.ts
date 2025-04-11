@@ -7,11 +7,13 @@ import { type updateData } from "../utils/schemas.js"
 export const settingsServiceGet = async (id:string) => {
    return await db.query.users.findFirst({
         where: eq(users.id, id),
-        columns: {
+       columns: {
+            id:true,
             email: true,
             username: true,
             phone: true,
             twoFactorSecret: true,
+            twoFactorEnabled:true
         },
         with: {
             password: {
@@ -85,3 +87,4 @@ return await db.transaction(async (tx) => {
     }
 });
 };
+

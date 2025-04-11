@@ -64,6 +64,12 @@ export const OneUserService = async (id: string) => {
 }
 
 
+export const OneUserServiceId = async (id: string) => {
+    return await db.query.users.findFirst({
+        where: eq(users.id,id)
+    })
+}
+
 
 
 

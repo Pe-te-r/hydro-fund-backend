@@ -1,17 +1,16 @@
-GET http://localhost:3000/settings/daf0ce6d-757b-4c5c-84fe-334e7f27ce73
+GET http://localhost:3000/settings/773c8ea0-97de-4b34-9113-0195b0e8b770
 
 ###
-PATCH   http://localhost:3000/settings/daf0ce6d-757b-4c5c-84fe-334e7f27ce73
+PATCH   http://localhost:3000/settings/773c8ea0-97de-4b34-9113-0195b0e8b770
 Content-Type: application/json
 
 {
-    "username":"shakirah",
     "phone":"0741195000",
     "password":{
-        "new":"shakirah123",
-        "old":"12345678"
-
+        "old":"12345678",
+        "new":"peter1234"
     }
+
 }
 
 

@@ -39,10 +39,12 @@ export const getDashBoardService = async (id: string) => {
         .where(
             and(
                 eq(referrals.referrerId, id),
-                not(referrals.isSelfReferral)
+                not(referrals.isSelfReferral),
+                eq(referrals.bonusStatus, 'completed')
             )
         )
         .then(res => res[0]?.count || 0);
+        console.log(referralCountResult)
 
     return {
         ...user,

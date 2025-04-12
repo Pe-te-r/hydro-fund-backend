@@ -8,6 +8,7 @@ import { bonusApi } from './bonus/bonus.route.js'
 import { settingsApi } from './settings/settings.route.js'
 import { email_route } from './email/emai.route.js'
 import { dashboardApi } from './dashboard/dashboard.route.js'
+import { adminUsersApi } from './admin/users/users.route.js'
 
 
 
@@ -21,6 +22,7 @@ app.route('/',bonusApi)
 app.route('/', settingsApi)
 app.route('/', email_route)
 app.route('/', dashboardApi)
+app.route('/', adminUsersApi)
 
 
 

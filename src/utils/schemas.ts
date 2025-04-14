@@ -43,3 +43,6 @@ export interface updateData {
     twoFactorSecret?: string;
     twoFactorEnabled?: boolean;
 }
+export const codeType  = z.object({
+    code:z.string()
+})

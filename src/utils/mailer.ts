@@ -3,6 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import handlebars from 'handlebars';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
 // Types for our email templates
 type TemplateType = 'register' | 'code' | '2fa';
 
@@ -18,11 +23,12 @@ interface MailConfig {
     from: string; // sender address
 }
 
-// Mail options interface
-interface MailOptions {
-    to: string;
-    subject: string;
-    html: string;
+// Response interface for sending emails
+interface SendMailResponse {
+    success: boolean;
+    message: string;
+    error?: string;
+    messageId?: string;
 }
 
 // Initialize mailer with configuration
@@ -38,14 +44,23 @@ export class Mailer {
             secure: config.secure,
             auth: config.auth,
         });
+
+        // Verify connection configuration
+        this.transporter.verify((error) => {
+            if (error) {
+                console.error('SMTP connection verification failed:', error);
+            } else {
+                console.log('SMTP server is ready to take our messages');
+            }
+        });
     }
 
-    // Method to send email
+    // Method to send email with proper success/failure tracking
     public async sendMail(
         to: string,
         templateType: TemplateType,
         code?: string
-    ): Promise<void> {
+    ): Promise<SendMailResponse> {
         try {
             // Load the appropriate template
             const templatePath = path.join(
@@ -53,6 +68,11 @@ export class Mailer {
                 '../templates',
                 `${templateType}.html`
             );
+
+            if (!fs.existsSync(templatePath)) {
+                throw new Error(`Template file not found: ${templatePath}`);
+            }
+
             const templateSource = fs.readFileSync(templatePath, 'utf8');
             const template = handlebars.compile(templateSource);
 
@@ -78,37 +98,45 @@ export class Mailer {
                     subject = 'Notification from Our Platform';
             }
 
-            // Prepare mail options
-            const mailOptions: MailOptions = {
+            // Send email and get the response
+            const info = await this.transporter.sendMail({
+                from: this.config.from,
                 to,
                 subject,
                 html,
-            };
-
-            // Send email
-            await this.transporter.sendMail({
-                from: this.config.from,
-                ...mailOptions,
             });
 
-            console.log(`Email sent to ${to} with template ${templateType}`);
+            console.log(`Email sent to ${to} (Message ID: ${info.messageId})`);
+
+            return {
+                success: true,
+                message: `Email successfully sent to ${to}`,
+                messageId: info.messageId
+            };
         } catch (error) {
-            console.error('Error sending email:', error);
-            throw error;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            console.error('Error sending email:', errorMessage);
+
+            return {
+                success: false,
+                message: `Failed to send email to ${to}`,
+                error: errorMessage
+            };
         }
     }
 }
 
-// Example configuration (you should get these from environment variables)
+// Example configuration (should come from environment variables in production)
 const mailConfig: MailConfig = {
-    host: 'smtp.example.com', // Your SMTP host
-    port: 587, // Your SMTP port
-    secure: false, // true for port 465, false for other ports
+    host: process.env.SMTP_HOST || '',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
     auth: {
-        user: 'your-email@example.com', // Your email
-        pass: 'your-password', // Your email password or app password
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
     },
-    from: '"Your App Name" <no-reply@example.com>', // Sender address
+    // from: process.env.SMTP_FROM || '"Your App Name" <no-reply@example.com>',
+    from: process.env.SMTP_FROM  || ''
 };
 
 // Create a singleton instance of the mailer

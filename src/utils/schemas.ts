@@ -24,15 +24,11 @@ export const updateDetails = z.object({
     email: z.string().email().optional(),
     username: z.string().min(3).optional(),
     phone: z.string().min(6).optional(),
-    twoFactorSecret: z.string().optional(),
+    twoFactorSecretCode: z.string().optional(),
     password: z.object({
         old: z.string().min(6),
         new: z.string().min(6)
     }).optional(),
-    code: z.object({
-        status: z.boolean().optional().default(false),
-        code:z.string()
-    }).optional()
 });
 
 export interface updateData {

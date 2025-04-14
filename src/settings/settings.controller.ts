@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { settingsServiceGet, updateUserSettings } from "./settings.service.js";
 import {  OneUserServiceId } from "../users/users.service.js";
+import { verifyTotpCode } from "../utils/totp.js";
 
 
 export const settingsController = async (c: Context) => {
@@ -39,20 +40,25 @@ export const updateSettings = async (c: Context) => {
         }
 
         const user_exits = await OneUserServiceId(id)
-        console.log(user_exits)
-        console.log('one')
         if (!user_exits) {
-            return c.json({status:'error',message:'user not found'},404)
+            return c.json({status:'error',message:'user not found',data:false},404)
         }
         const data = c.get('validatedData')
-        console.log(data)
+
+        if (data.twoFactorSecretCode && verifyTotpCode(user_exits.twoFactorSecret,data.twoFactorSecretCode)) {
+            const results = await updateUserSettings(id, { twoFactorEnabled: true })
+            if (results.success) return c.json({ status: 'success', message: '2Fa enabled successfully',data:true })
+            c.json({ status: 'error', message: '2Fa not enabled' ,data:false})
+        
+        } else if (!verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {
+            c.json({ status: 'error', message: '2Fa not enabled',data:false })
+        }
 
         const results = await updateUserSettings(id, data)
-        console.log(results)
         
 
-        if( results.success === false)return c.json(results,403)
-        return c.json(results,200)
+        if (results.success === false) return c.json({ status: 'error', message: 'data not update', data: false },403)
+        return c.json({status:'success',message:'data update successfully',data:true},200)
             
     } catch (error) {
         // console.log(error)

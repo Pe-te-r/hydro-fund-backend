@@ -62,11 +62,11 @@ export const withdrawals = pgTable('withdrawals', {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     amount: decimal('amount', { precision: 19, scale: 4 }).notNull(),
-    netAmount: decimal('netamount', {precision: 19, scale: 4}),
+    netAmount: decimal('netAmount', {precision: 19, scale: 4}),
     fee: decimal('fee', { precision: 19, scale: 4 }),
     phone: varchar('phone').notNull(),
     admin_info:text('admin'),
-    status: withdrawalStatusEnum('status').default('pending'),
+    status: withdrawalStatusEnum('status').default('pending').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     processedAt: timestamp('process_at'),
 });

@@ -49,9 +49,9 @@ export const codeType  = z.object({
 
 export const withdrawData = z.object({
     userId: z.string(),
-    amount: z.string(),
-    netAmount: z.string(),
-    fee: z.string(),
+    amount: z.number(),
+    netAmount: z.number(),
+    fee: z.number(),
     phone:z.string(),
     admin_info:z.string().optional(),
 })

@@ -46,3 +46,8 @@ export interface updateData {
 export const codeType  = z.object({
     code:z.string()
 })
+
+export const withdrawData = z.object({
+    userId: z.string(),
+    amount: z.string(),
+})

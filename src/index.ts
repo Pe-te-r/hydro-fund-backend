@@ -9,6 +9,7 @@ import { settingsApi } from './settings/settings.route.js'
 import { email_route } from './email/emai.route.js'
 import { dashboardApi } from './dashboard/dashboard.route.js'
 import { adminUsersApi } from './admin/users/users.route.js'
+import { withdraw_route } from './withdraw/withdraw.route.js'
 
 
 
@@ -23,6 +24,7 @@ app.route('/', settingsApi)
 app.route('/', email_route)
 app.route('/', dashboardApi)
 app.route('/', adminUsersApi)
+app.route('/', withdraw_route)
 
 
 

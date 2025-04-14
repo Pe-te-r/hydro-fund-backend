@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { OneUserServiceId } from "../users/users.service.js";
-import { processWithdrawal } from "./withdraw.service.js";
+import { processWithdrawal, transactionsHistoryService } from "./withdraw.service.js";
 
 export const widthdraw_route = async (c: Context) => {
     try {
@@ -53,7 +53,6 @@ export const get_details = async (c: Context) => {
         if (!user_exits) {
             return c.json({ status: 'error', message: 'user not found', data: false }, 404)
         }
-        console.log(user_exits)
         
         return c.json({ status: 'success', message: 'retrival was success', data: {phone:user_exits.phone,amount:user_exits.balance} }, 200)
         
@@ -61,5 +60,32 @@ export const get_details = async (c: Context) => {
     } catch (error) {
         console.log(error)
         return c.json({ status: 'error', message: 'an error', data: false }, 500)
+    }
+}
+
+export const transactionsController = async (c: Context) => {
+    try {
+        const id = c.req.param('id')
+
+        if (!isValidUUID(id)) {
+            return c.json(
+                { status: 'error', message: 'Invalid user ID format' }, 400
+            );
+        }
+
+        const user_exits = await OneUserServiceId(id)
+        if (!user_exits) {
+            return c.json({ status: 'error', message: 'user not found', data: false }, 404)
+        }
+        
+        const info = await transactionsHistoryService(id)
+        console.log(info)
+        if (info) return c.json({ status: 'success', message: 'transactions retrived successfull', data: info }, 200)
+        return c.json({ status: 'error', message: 'no transactions history', data: false }, 404)
+        
+    } catch (error) {
+        console.log(error)
+        return c.json({ status: 'error', message: 'an error', data: false }, 500)
+
     }
 }

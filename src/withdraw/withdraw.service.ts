@@ -63,3 +63,9 @@ export const processWithdrawal = async (data: WithdrawRequest) => {
         return withdrawal;
     });
 };
+
+export const transactionsHistoryService = async (id: string) => {
+    return await db.query.withdrawals.findMany({
+        where: eq(withdrawals.userId, id),
+    })
+}

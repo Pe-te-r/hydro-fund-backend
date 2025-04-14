@@ -14,10 +14,9 @@ export const alertStatusEnum = pgEnum('alert_status', ['open', 'investigating', 
 export const productCategoryEnum = pgEnum('product_category', ['retail', 'wholesale', 'digital', 'service']);
 export const withdrawalStatusEnum = pgEnum('withdrawal_status', [
     'pending',
-    'processing',
     'completed',
     'rejected',
-    'failed'
+    'canceled'
 ]);
 
 // Users table (expanded with enums)

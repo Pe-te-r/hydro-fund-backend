@@ -64,8 +64,86 @@ export const processWithdrawal = async (data: WithdrawRequest) => {
     });
 };
 
-export const transactionsHistoryService = async (id: string) => {
+export const transactionsHistoryService = async (id: string,admin:boolean=false) => {
+    if (admin) {
+        return await db.query.withdrawals.findMany({
+            where: eq(withdrawals.status, 'pending'),
+            columns: {
+                processedAt: false,
+                admin_info:false
+            },
+            with: {
+                user: {
+                    columns: {
+                        balance: true,
+                        email: true,
+                        vipTier:true
+                    }
+                }
+            }
+        })
+    }
+    
     return await db.query.withdrawals.findMany({
         where: eq(withdrawals.userId, id),
     })
 }
+
+export const getTransaction = async (id: string) => {
+
+    return await db.query.withdrawals.findFirst({where:eq(withdrawals.id,id)})
+}
+
+
+export const cancelWithdrawService = async (id: string, role: 'admin' | 'user') => {
+    return db.transaction(async (tx) => {
+        // 1. First, get the withdrawal with user details and lock the rows
+        const withdrawal = await tx.query.withdrawals.findFirst({
+            where: eq(withdrawals.id, id),
+            with: {
+                user: true // Join with user table
+            }
+        });
+
+        if (!withdrawal) {
+            throw new Error('Withdrawal not found');
+        }
+
+        // 2. Verify the withdrawal can be canceled
+        if (withdrawal.status !== 'pending') {
+            throw new Error('Only pending withdrawals can be canceled');
+        }
+
+        // 3. Determine the new status based on role
+        const newStatus = role === 'admin' ? 'rejected' : 'canceled';
+        const adminNote = role === 'admin'
+            ? 'Withdrawal rejected by admin'
+            : 'Withdrawal canceled by user';
+
+        // 4. Calculate refund amount (amount + fee)
+        const refundAmount = sql`${withdrawal.amount} + ${withdrawal.fee}`;
+
+        // 5. Execute the updates in a single transaction
+        await tx.update(withdrawals)
+            .set({
+                status: newStatus,
+                processedAt: sql`NOW()`,
+                admin_info: adminNote
+            })
+            .where(eq(withdrawals.id, id));
+
+        // 6. Refund the money to user's balance
+        await tx.update(users)
+            .set({
+                balance: sql`${users.balance} + ${refundAmount}`,
+                totalWithdrawn: sql`${users.totalWithdrawn} - ${withdrawal.amount}`
+            })
+            .where(eq(users.id, withdrawal.userId));
+
+        return {
+            success: true,
+            message: `Withdrawal ${newStatus} successfully`,
+            refundAmount: parseFloat(withdrawal.amount) + parseFloat(withdrawal.fee)
+        };
+    });
+};

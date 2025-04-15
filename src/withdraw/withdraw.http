@@ -1,2 +1,2 @@
 # GET http://localhost:3000/withdraw/3ebfbf48-336d-4657-afa9-a1ea678c18c9
-GET http://localhost:3000/withdraw/transactions/3ebfbf48-336d-4657-afa9-a1ea678c18c9
+GET http://localhost:3000/withdraw/transactions/3ebfbf48-336d-4657-afa9-a1ea678c18c9?admin=true

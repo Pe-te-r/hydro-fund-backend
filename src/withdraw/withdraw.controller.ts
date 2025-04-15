@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { OneUserServiceId } from "../users/users.service.js";
-import { processWithdrawal, transactionsHistoryService } from "./withdraw.service.js";
+import { cancelWithdrawService, getTransaction, processWithdrawal, transactionsHistoryService } from "./withdraw.service.js";
 
 export const widthdraw_route = async (c: Context) => {
     try {
@@ -39,10 +39,20 @@ export const widthdraw_route = async (c: Context) => {
     }
 }
 
+export const getAllHistory = async (c: Context) => {
+    try {
+        
+    } catch (error) {
+        
+        return c.json({ status: 'error', message: 'an error', data: false }, 500)
+    }
+}
+
 export const get_details = async (c: Context) => {
     try {
         const id = c.req.param('id')
 
+        
         if (!isValidUUID(id)) {
             return c.json(
                 { status: 'error', message: 'Invalid user ID format' }, 400
@@ -66,6 +76,7 @@ export const get_details = async (c: Context) => {
 export const transactionsController = async (c: Context) => {
     try {
         const id = c.req.param('id')
+        const isAdmin = c.req.query('admin') === 'true';
 
         if (!isValidUUID(id)) {
             return c.json(
@@ -78,7 +89,7 @@ export const transactionsController = async (c: Context) => {
             return c.json({ status: 'error', message: 'user not found', data: false }, 404)
         }
         
-        const info = await transactionsHistoryService(id)
+        const info = await transactionsHistoryService(id,isAdmin)
         console.log(info)
         if (info) return c.json({ status: 'success', message: 'transactions retrived successfull', data: info }, 200)
         return c.json({ status: 'error', message: 'no transactions history', data: false }, 404)
@@ -86,6 +97,30 @@ export const transactionsController = async (c: Context) => {
     } catch (error) {
         console.log(error)
         return c.json({ status: 'error', message: 'an error', data: false }, 500)
+        
+    }
+}
 
+export const transactionCancel = async (c: Context) => {
+    try {
+        const id = c.req.param('id')
+
+        if (!isValidUUID(id)) {
+            return c.json(
+                { status: 'error', message: 'Invalid user ID format' }, 400
+            );
+        }
+        const transactions_exits = await getTransaction(id)
+        if (!transactions_exits) {
+            return c.json({ status: 'error', message: 'transaction not found', data: false }, 404)
+        }
+
+        const result = await cancelWithdrawService(id, 'user')
+        return c.json({ status: result.success, message: result.message },200)
+        
+
+    } catch (error) {
+        console.log(error)
+        return c.json({ status: 'error', message: 'an error', data: false }, 500)
     }
 }

@@ -64,38 +64,43 @@ export const processWithdrawal = async (data: WithdrawRequest) => {
     });
 };
 
-export const transactionsHistoryService = async (id: string,admin:boolean=false) => {
-    if (admin) {
+// all transaction 
+export const transactionHistory = async () => {
         return await db.query.withdrawals.findMany({
-            where: eq(withdrawals.status, 'pending'),
+            // where: eq(withdrawals.status, 'pending'),
             columns: {
                 processedAt: false,
-                admin_info:false
+                admin_info: false
             },
             with: {
                 user: {
                     columns: {
                         balance: true,
                         email: true,
-                        vipTier:true
+                        vipTier: true
                     }
                 }
             }
         })
-    }
+
+}
+
+// single user
+export const transactionsHistoryService = async (id: string,admin:boolean=false) => {
     
     return await db.query.withdrawals.findMany({
         where: eq(withdrawals.userId, id),
     })
 }
 
+// one transaction id
 export const getTransaction = async (id: string) => {
 
     return await db.query.withdrawals.findFirst({where:eq(withdrawals.id,id)})
 }
 
-
-export const cancelWithdrawService = async (id: string, role: 'admin' | 'user') => {
+// cancel transactions
+export const cancelWithdrawService = async (id: string, role: 'admin' | 'user', note = 'Withdrawal rejected by admin' ) => {
     return db.transaction(async (tx) => {
         // 1. First, get the withdrawal with user details and lock the rows
         const withdrawal = await tx.query.withdrawals.findFirst({
@@ -117,7 +122,7 @@ export const cancelWithdrawService = async (id: string, role: 'admin' | 'user') 
         // 3. Determine the new status based on role
         const newStatus = role === 'admin' ? 'rejected' : 'canceled';
         const adminNote = role === 'admin'
-            ? 'Withdrawal rejected by admin'
+            ? note
             : 'Withdrawal canceled by user';
 
         // 4. Calculate refund amount (amount + fee)

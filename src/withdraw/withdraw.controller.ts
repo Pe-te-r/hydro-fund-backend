@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { OneUserServiceId } from "../users/users.service.js";
-import { cancelWithdrawService, getTransaction, processWithdrawal, transactionsHistoryService } from "./withdraw.service.js";
+import { cancelWithdrawService, getTransaction, processWithdrawal, transactionHistory, transactionsHistoryService } from "./withdraw.service.js";
 
 export const widthdraw_route = async (c: Context) => {
     try {
@@ -41,7 +41,11 @@ export const widthdraw_route = async (c: Context) => {
 
 export const getAllHistory = async (c: Context) => {
     try {
-        
+        const results = await transactionHistory()
+        if (results.length > 0) {
+            return c.json({ status: 'success', message: 'withdraw process started', data: results }, 200)
+        }
+        return c.json({ status: 'error', message: 'no pending transaction', data: false }, 400)
     } catch (error) {
         
         return c.json({ status: 'error', message: 'an error', data: false }, 500)
@@ -90,7 +94,6 @@ export const transactionsController = async (c: Context) => {
         }
         
         const info = await transactionsHistoryService(id,isAdmin)
-        console.log(info)
         if (info) return c.json({ status: 'success', message: 'transactions retrived successfull', data: info }, 200)
         return c.json({ status: 'error', message: 'no transactions history', data: false }, 404)
         
@@ -101,10 +104,19 @@ export const transactionsController = async (c: Context) => {
     }
 }
 
+type Role = "user" | "admin"
+
 export const transactionCancel = async (c: Context) => {
     try {
         const id = c.req.param('id')
+        console.log(c.req.query('admin'))
+        const admin = c.req.query('admin') === 'true'
+        let user: Role = 'user'
+        if (admin) user = 'admin'
+        console.log(admin)
 
+        const data = await c.req.json()
+        console.log(data)
         if (!isValidUUID(id)) {
             return c.json(
                 { status: 'error', message: 'Invalid user ID format' }, 400
@@ -115,7 +127,7 @@ export const transactionCancel = async (c: Context) => {
             return c.json({ status: 'error', message: 'transaction not found', data: false }, 404)
         }
 
-        const result = await cancelWithdrawService(id, 'user')
+        const result = await cancelWithdrawService(id, user,data?.reason)
         return c.json({ status: result.success, message: result.message },200)
         
 

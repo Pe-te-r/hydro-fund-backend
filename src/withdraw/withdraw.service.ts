@@ -152,3 +152,12 @@ export const cancelWithdrawService = async (id: string, role: 'admin' | 'user', 
         };
     });
 };
+
+
+// approve 
+
+export const approveTransactionService = async (id: string) => {
+    return await db.update(withdrawals).set({status:'completed'}).where(
+        eq(withdrawals.id,id)
+    )
+}

@@ -27,6 +27,7 @@ export const users = pgTable('users', {
     phone: varchar('phone', { length: 256 }).notNull().unique(),
     status: userStatusEnum('status').default('active'),
     balance: decimal('balance', { precision: 19, scale: 4 }).default('0'),
+    deposit: decimal('deposit', { precision: 19, scale: 4 }).default('0'),
     twoFactorSecret: text('two_factor_secret').notNull(),
     twoFactorEnabled: boolean('two_factor_secret_enable').default(false),
     vipTier: vipTierEnum('vip_tier'),

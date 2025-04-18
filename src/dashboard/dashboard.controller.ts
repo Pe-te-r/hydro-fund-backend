@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
-import { getDashBoardService } from "./dashboard.service.js";
+import { adminDashboardService, getDashBoardService } from "./dashboard.service.js";
 import { OneUserService } from "../users/users.service.js";
 
 export const getDashboard = async (c: Context) => {
@@ -19,6 +19,18 @@ export const getDashboard = async (c: Context) => {
         return c.json(results)
     } catch (error) {
         console.log(error)
-        return c.json('error')
+        return c.json({status:'error',message:'an error occured'},500)
+    }
+}
+
+export const getAdminDashboard = async (c: Context) => {
+    try {
+        const results = await adminDashboardService()
+        return c.json({status:'success',message:'info retrived success',data:results})
+        
+    } catch (error) {
+        console.log(error)
+        return c.json({status:'error',message:'an error occured'},500)
+        
     }
 }

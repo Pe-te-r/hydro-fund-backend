@@ -1,1 +1,3 @@
 GET http://localhost:3000/dashboard/3ebfbf48-336d-4657-afa9-a1ea678c18c9
+###
+GET http://localhost:3000/dashboard

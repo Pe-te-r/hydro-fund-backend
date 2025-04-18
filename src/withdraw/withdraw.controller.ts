@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
 import { OneUserServiceId } from "../users/users.service.js";
-import { cancelWithdrawService, getTransaction, processWithdrawal, transactionHistory, transactionsHistoryService } from "./withdraw.service.js";
+import { approveTransactionService, cancelWithdrawService, getTransaction, processWithdrawal, transactionHistory, transactionsHistoryService } from "./withdraw.service.js";
 
 export const widthdraw_route = async (c: Context) => {
     try {
@@ -77,6 +77,33 @@ export const get_details = async (c: Context) => {
     }
 }
 
+export const approveController = async (c: Context) => {
+    try {
+        // const id = c.req.param('id')
+
+        const data = await c.req.json()
+        console.log(data)
+        const id = data['id']
+        if (!isValidUUID(id)) {
+            return c.json(
+                { status: 'error', message: 'Invalid user ID format' }, 400
+            );
+        }
+        const transactions_exits = await getTransaction(id)
+        if (!transactions_exits) {
+            return c.json({ status: 'error', message: 'transaction not found', data: false }, 404)
+        }
+        const results = await approveTransactionService(id)
+        if (results) return c.json({ status: 'success', message: 'approval done' },200)
+        return c.json({status:'error',message:'approval not done'},400)
+
+    } catch (error) {
+         console.log(error)
+        return c.json({ status: 'error', message: 'an error', data: false }, 500)
+        
+    }
+}
+
 export const transactionsController = async (c: Context) => {
     try {
         const id = c.req.param('id')
@@ -113,10 +140,8 @@ export const transactionCancel = async (c: Context) => {
         const admin = c.req.query('admin') === 'true'
         let user: Role = 'user'
         if (admin) user = 'admin'
-        console.log(admin)
 
         const data = await c.req.json()
-        console.log(data)
         if (!isValidUUID(id)) {
             return c.json(
                 { status: 'error', message: 'Invalid user ID format' }, 400

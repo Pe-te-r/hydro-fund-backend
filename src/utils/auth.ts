@@ -25,7 +25,7 @@ export const baseAuth = (options?: { roles?: ('user' | 'admin')[] }) => {
     return async (c: Context, next: Next) => {
         const authHeader = c.req.header('Authorization');
         if (!authHeader?.startsWith('Bearer ')) {
-            return c.json({ status: 'error', message: 'Authorization header missing' }, 401);
+            return c.json({ status: 'error', token:true ,message: 'Authorization header missing' }, 401);
         }
 
         const token = authHeader.split(' ')[1];
@@ -47,7 +47,7 @@ export const baseAuth = (options?: { roles?: ('user' | 'admin')[] }) => {
 
             // Role check (if specified)
             if (options?.roles && !options.roles.includes(payload.role)) {
-                return c.json({ status: 'error', message: 'Insufficient permissions' }, 403);
+                return c.json({ status: 'error', token: false,message: 'Insufficient permissions' }, 403);
             }
 
             // Attach user to context
@@ -56,12 +56,12 @@ export const baseAuth = (options?: { roles?: ('user' | 'admin')[] }) => {
 
         } catch (err) {
             if (err instanceof jwt.TokenExpiredError) {
-                return c.json({ status: 'error', message: 'Token expired' }, 401);
+                return c.json({ status: 'error', token: true,message: 'Token expired' }, 401);
             }
             if (err instanceof jwt.JsonWebTokenError) {
-                return c.json({ status: 'error', message: 'Invalid token' }, 401);
+                return c.json({ status: 'error', token:true,message: 'Invalid token' }, 401);
             }
-            return c.json({ status: 'error', message: 'Authentication failed' }, 500);
+            return c.json({ status: 'error', token:false,message: 'Authentication failed' }, 500);
         }
     };
 };

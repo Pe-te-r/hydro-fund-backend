@@ -66,7 +66,7 @@ export const login_controller = async (c: Context) => {c
             
             await lastLoginUpdate(user_exits.id)
 
-            const token = generateUserToken(user_exits.id,user_exits.email)
+            const token = generateUserToken(user_exits.id,user_exits.email,String(user_exits.role))
             
             return c.json({ "status": 'success', 'message': 'success login', data: { user:user_exits ,token}, })
         }

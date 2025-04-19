@@ -4,7 +4,7 @@ import type { Next,Context } from 'hono';
 
 
 
-export function generateUserToken(userId: string, email: string,role:string='user') {
+export function generateUserToken(userId: string, email: string, role: string='user') {
     // 1. Encrypt sensitive data
     const encryptedData = CryptoJS.AES.encrypt(
         JSON.stringify({ userId, email,role }),
@@ -20,47 +20,48 @@ export function generateUserToken(userId: string, email: string,role:string='use
 }
 
 
-export const userAuth = async (c:Context,next: Next) => {
 
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-        return c.json({ status:'error',message: 'Authorization header missing or invalid' }, 401);
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-        // 1. Verify JWT
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { data: string };
-
-        // 2. Decrypt payload
-        const bytes = CryptoJS.AES.decrypt(decoded.data, process.env.ENCRYPTION_KEY!);
-        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-
-        if (!decrypted) {
-            return c.json({"status":'error','message':'Token decryption failed' }, 401);
+export const baseAuth = (options?: { roles?: ('user' | 'admin')[] }) => {
+    return async (c: Context, next: Next) => {
+        const authHeader = c.req.header('Authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+            return c.json({ status: 'error', message: 'Authorization header missing' }, 401);
         }
 
-        // 3. Parse and validate payload
-        const payload = JSON.parse(decrypted);
-        if (!payload.userId || !payload.email || !payload.role) {
-            return c.json({ status:'error',message: 'Invalid token payload' }, 401);
-        }
+        const token = authHeader.split(' ')[1];
 
-        // 4. Attach user to context
-        c.set('user', payload);
+        try {
+            // Verify JWT
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { data: string };
 
-        // Proceed to controller
-        return await next();
+            // Decrypt
+            const bytes = CryptoJS.AES.decrypt(decoded.data, process.env.ENCRYPTION_KEY!);
+            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+            if (!decrypted) throw new Error('Decryption failed');
 
-    } catch (err) {
-        // Handle specific error cases
-        if (err instanceof jwt.TokenExpiredError) {
-            return c.json({status:'error', message: 'Token expired' }, 401);
+            // Parse payload
+            const payload = JSON.parse(decrypted);
+            if (!payload.userId || !payload.email || !payload.role) {
+                throw new Error('Invalid payload');
+            }
+
+            // Role check (if specified)
+            if (options?.roles && !options.roles.includes(payload.role)) {
+                return c.json({ status: 'error', message: 'Insufficient permissions' }, 403);
+            }
+
+            // Attach user to context
+            c.set('user', payload);
+            return await next();
+
+        } catch (err) {
+            if (err instanceof jwt.TokenExpiredError) {
+                return c.json({ status: 'error', message: 'Token expired' }, 401);
+            }
+            if (err instanceof jwt.JsonWebTokenError) {
+                return c.json({ status: 'error', message: 'Invalid token' }, 401);
+            }
+            return c.json({ status: 'error', message: 'Authentication failed' }, 500);
         }
-        if (err instanceof jwt.JsonWebTokenError) {
-            return c.json({status:'error', message: 'Invalid token' }, 401);
-        }
-        return c.json({ status:'error',message: 'Authentication failed' }, 500);
-    }
-}
+    };
+};

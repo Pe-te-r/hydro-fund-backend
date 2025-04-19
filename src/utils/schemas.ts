@@ -25,6 +25,7 @@ export const updateDetails = z.object({
     username: z.string().min(3).optional(),
     phone: z.string().min(6).optional(),
     twoFactorSecretCode: z.string().optional(),
+    twoFactorEnabled: z.boolean().optional(),
     password: z.object({
         old: z.string().min(6),
         new: z.string().min(6)
@@ -42,6 +43,7 @@ export interface updateData {
     code?: string;
     twoFactorSecret?: string;
     twoFactorEnabled?: boolean;
+    
 }
 export const codeType  = z.object({
     code:z.string()

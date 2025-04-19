@@ -12,6 +12,7 @@ export const orderStatusEnum = pgEnum('order_status', ['pending', 'processing', 
 export const alertSeverityEnum = pgEnum('alert_severity', ['low', 'medium', 'high', 'critical']);
 export const alertStatusEnum = pgEnum('alert_status', ['open', 'investigating', 'resolved', 'false_positive']);
 export const productCategoryEnum = pgEnum('product_category', ['retail', 'wholesale', 'digital', 'service']);
+export const roleEnum = pgEnum('role',['admin','user'])
 export const withdrawalStatusEnum = pgEnum('withdrawal_status', [
     'pending',
     'completed',
@@ -29,6 +30,7 @@ export const users = pgTable('users', {
     balance: decimal('balance', { precision: 19, scale: 4 }).default('0'),
     deposit: decimal('deposit', { precision: 19, scale: 4 }).default('0'),
     twoFactorSecret: text('two_factor_secret').notNull(),
+    role: roleEnum('role').default('user'),
     twoFactorEnabled: boolean('two_factor_secret_enable').default(false),
     vipTier: vipTierEnum('vip_tier'),
     code:varchar('code'),

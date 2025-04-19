@@ -132,7 +132,7 @@ export const cancelWithdrawService = async (id: string, role: 'admin' | 'user', 
         await tx.update(withdrawals)
             .set({
                 status: newStatus,
-                processedAt: sql`NOW()`,
+                processedAt: new Date(),
                 admin_info: adminNote
             })
             .where(eq(withdrawals.id, id));

@@ -35,16 +35,18 @@ export const getUserInvest = async (c: Context) => {
 export const addInvest = async (c: Context) => {
     try {
         const data = await c.req.json()
+        console.log(data)
         // const data = c.get('validatedData')
-        if (!isValidUUID(data.id)) {
+        c
+        if (!isValidUUID(data.userId)) {
             return c.json({ status: 'error', message: 'Invalid user ID format' }, 400);
         }
 
-        const user_exits = await OneUserServiceId(data.id)
+        const user_exits = await OneUserServiceId(data.userId)
         if (!user_exits) {
             return c.json({ status: 'error', message: 'user not found', data: false }, 404)
         }
-        if (user_exits.balance || 0 < data.totalAmount) {
+        if ((user_exits.balance || 0) < data.totalAmount) {
             return c.json({status:'error',message:'insufficient balance'},400)
             
         }

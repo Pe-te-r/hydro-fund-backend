@@ -80,6 +80,7 @@ export const orders = pgTable('orders', {
     userId: uuid('user_id').references(() => users.id),
     totalAmount: decimal('total_amount', { precision: 19, scale: 4 }).notNull(),
     status: investmentStatusEnum('status').default('active'), // pending, completed, cancelled
+    claimed:boolean('claimed').default(false),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -88,7 +89,7 @@ export const orders = pgTable('orders', {
 export const orderItems = pgTable('order_items', {
     id: uuid('id').defaultRandom().primaryKey(),
     orderId: uuid('order_id').references(() => orders.id),
-    productId: uuid('product_id').notNull(),
+    productId: integer('product_id').notNull(),
     productName: text('product_name').notNull(),
     quantity: integer('quantity').notNull(),
     price: decimal('price', { precision: 19, scale: 4 }).notNull(),

@@ -61,7 +61,7 @@ export const withdrawData = z.object({
 
 
 const OrderItemSchema = z.object({
-    productId: z.string().uuid(),
+    productId: z.number(),
     productName: z.string().min(1),
     quantity: z.number().int().positive(),
     price: z.number().positive(),

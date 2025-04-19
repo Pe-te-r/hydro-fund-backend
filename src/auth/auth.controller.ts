@@ -62,6 +62,8 @@ export const login_controller = async (c: Context) => {c
         if (!user_exits) {
             return c.json({'status':'error','message':'user not found'},404)
         }
+        if (user_exits.status == 'blocked') return c.json({ status: 'error', 'message': 'account blocked by admin' }, 401)
+        if (user_exits.status == 'suspended') return c.json({ status: 'error', 'message': 'account blocked by admin' }, 401)
         if ('password' in data && user_exits && await correct_password(String(user_exits.id), String(data['password']))) {
             
             await lastLoginUpdate(user_exits.id)

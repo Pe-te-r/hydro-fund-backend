@@ -76,5 +76,9 @@ export const CreateOrderSchema = z.object({
     totalAmount: z.number().positive(),
 });
 
+export const updateUserStatus = z.object({
+    status:z.string()
+})
+
 // Type derived from the schema
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

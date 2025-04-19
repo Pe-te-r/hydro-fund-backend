@@ -44,7 +44,6 @@ export const updateSettings = async (c: Context) => {
             return c.json({status:'error',message:'user not found',data:false},404)
         }
         const data = c.get('validatedData')
-        console.log(data.twoFactorSecretCode && verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode))
 
         // check for otp and verification
         if (data.twoFactorSecretCode && verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {

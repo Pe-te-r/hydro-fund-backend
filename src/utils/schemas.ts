@@ -57,3 +57,24 @@ export const withdrawData = z.object({
     phone:z.string(),
     admin_info:z.string().optional(),
 })
+
+
+
+const OrderItemSchema = z.object({
+    productId: z.string().uuid(),
+    productName: z.string().min(1),
+    quantity: z.number().int().positive(),
+    price: z.number().positive(),
+    dailyIncome: z.number().nonnegative(),
+    totalIncome: z.number().nonnegative(),
+    cycle: z.number().int().positive()
+});
+
+export const CreateOrderSchema = z.object({
+    userId: z.string().uuid(),
+    items: z.array(OrderItemSchema).nonempty(),
+    totalAmount: z.number().positive(),
+});
+
+// Type derived from the schema
+export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;

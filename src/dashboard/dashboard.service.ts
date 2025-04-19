@@ -3,7 +3,6 @@ import { db } from "../db/db.js";
 import {
     referrals, users, withdrawals,
     
-    investments,
     userStatusEnum,
     transactionStatusEnum,
     investmentStatusEnum,
@@ -145,20 +144,20 @@ export const adminDashboardService = async () => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     // Get active investments count
-    const activeInvestments = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(investments)
-        .where(eq(investments.status, investmentStatusEnum.enumValues[0])) // 'active'
-        .execute()
-        .then(res => res[0].count);
+    // const activeInvestments = await db
+    //     .select({ count: sql<number>`count(*)` })
+    //     .from(investments)
+    //     .where(eq(investments.status, investmentStatusEnum.enumValues[0])) // 'active'
+    //     .execute()
+    //     .then(res => res[0].count);
 
     // Get completed investments count
-    const completedInvestments = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(investments)
-        .where(eq(investments.status, investmentStatusEnum.enumValues[1])) // 'completed'
-        .execute()
-        .then(res => res[0].count);
+    // const completedInvestments = await db
+    //     .select({ count: sql<number>`count(*)` })
+    //     .from(investments)
+    //     .where(eq(investments.status, investmentStatusEnum.enumValues[1])) // 'completed'
+    //     .execute()
+    //     .then(res => res[0].count);
 
     // Get total invested amount
     const totalInvested = await db
@@ -176,8 +175,8 @@ export const adminDashboardService = async () => {
             totalWithdrawn,
             totalFees,
             totalInvested,
-            activeInvestments,
-            completedInvestments
+            // activeInvestments,
+            // completedInvestments
         },
         distributions: {
             vip: vipDistribution,

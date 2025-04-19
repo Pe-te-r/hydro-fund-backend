@@ -7,7 +7,7 @@ export const vipTierEnum = pgEnum('vip_tier', ['standard','bronze', 'silver', 'g
 export const paymentMethodEnum = pgEnum('payment_method', ['mpesa', 'paypal', 'crypto', 'bank_transfer']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withdrawal', 'fee', 'bonus', 'investment', 'earning']);
 export const transactionStatusEnum = pgEnum('transaction_status', ['pending',"expired" ,'completed', 'failed', 'reversed']);
-export const investmentStatusEnum = pgEnum('investment_status', ['active', 'completed', 'cancelled', 'pending']);
+export const investmentStatusEnum = pgEnum('investment_status', ['active', 'completed']);
 export const orderStatusEnum = pgEnum('order_status', ['pending', 'processing', 'completed', 'cancelled']);
 export const alertSeverityEnum = pgEnum('alert_severity', ['low', 'medium', 'high', 'critical']);
 export const alertStatusEnum = pgEnum('alert_status', ['open', 'investigating', 'resolved', 'false_positive']);
@@ -19,6 +19,7 @@ export const withdrawalStatusEnum = pgEnum('withdrawal_status', [
     'rejected',
     'canceled'
 ]);
+
 
 // Users table (expanded with enums)
 export const users = pgTable('users', {
@@ -73,31 +74,28 @@ export const withdrawals = pgTable('withdrawals', {
     processedAt: timestamp('process_at'),
 });
 
-export const investmentPlans = pgTable('investment_plans', {
+// Schema for orders
+export const orders = pgTable('orders', {
     id: uuid('id').defaultRandom().primaryKey(),
-    name: varchar('name', { length: 100 }).notNull(),
-    durationHours: integer('duration_hours').notNull(),
-    baseReturnPercentage: decimal('return_percentage', { precision: 5, scale: 2 }).notNull(),
-    minAmount: decimal('min_amount', { precision: 19, scale: 4 }).notNull(),
-    maxAmount: decimal('max_amount', { precision: 19, scale: 4 }),
-    description: text('description'),
-    isActive: boolean('is_active').default(true),
+    userId: uuid('user_id').references(() => users.id),
+    totalAmount: decimal('total_amount', { precision: 19, scale: 4 }).notNull(),
+    status: investmentStatusEnum('status').default('active'), // pending, completed, cancelled
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const investments = pgTable('investments', {
+// Schema for order items
+export const orderItems = pgTable('order_items', {
     id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').notNull().references(() => users.id),
-    planId: uuid('plan_id').references(() => investmentPlans.id),
-    amount: decimal('amount', { precision: 19, scale: 4 }).notNull(),
-    expectedReturn: decimal('expected_return', { precision: 19, scale: 4 }).notNull(),
-    actualReturn: decimal('actual_return', { precision: 19, scale: 4 }),
-    startDate: timestamp('start_date').defaultNow(),
-    endDate: timestamp('end_date'),
-    status: investmentStatusEnum('status').default('active'),
-    isReinvested: boolean('is_reinvested').default(false),
-    productId: uuid('product_id'),
+    orderId: uuid('order_id').references(() => orders.id),
+    productId: uuid('product_id').notNull(),
+    productName: text('product_name').notNull(),
+    quantity: integer('quantity').notNull(),
+    price: decimal('price', { precision: 19, scale: 4 }).notNull(),
+    dailyIncome: decimal('daily_income', { precision: 19, scale: 4 }).notNull(),
+    totalIncome: decimal('total_income', { precision: 19, scale: 4 }).notNull(),
+    cycle: integer('cycle').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
 });
 
 export const newBonus = pgTable('bonus', {
@@ -199,4 +197,22 @@ export const withdrawalsRelations = relations(withdrawals, ({ one }) => ({
         fields: [withdrawals.userId],
         references: [users.id],
     }), 
+}));
+
+
+//orders
+export const ordersRelations = relations(orders, ({ many, one }) => ({
+    items: many(orderItems),
+    user: one(users, {
+        fields: [orders.userId],
+        references: [users.id],
+    }),
+}));
+
+// order-item
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+    order: one(orders, {
+        fields: [orderItems.orderId],
+        references: [orders.id],
+    }),
 }));

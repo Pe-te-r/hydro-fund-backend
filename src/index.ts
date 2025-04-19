@@ -10,6 +10,7 @@ import { email_route } from './email/emai.route.js'
 import { dashboardApi } from './dashboard/dashboard.route.js'
 import { adminUsersApi } from './admin/users/users.route.js'
 import { withdraw_route } from './withdraw/withdraw.route.js'
+import { investApi } from './invest/invest.route.js'
 
 
 
@@ -25,6 +26,7 @@ app.route('/', email_route)
 app.route('/', dashboardApi)
 app.route('/', adminUsersApi)
 app.route('/', withdraw_route)
+app.route('/', investApi)
 
 
 

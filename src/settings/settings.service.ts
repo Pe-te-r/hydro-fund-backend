@@ -3,6 +3,7 @@ import { db } from "../db/db.js"
 import { passwords, users } from "../db/schema.js"
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { type updateData } from "../utils/schemas.js"
+import { generateTotpSecret } from "../utils/totp.js";
 
 export const settingsServiceGet = async (id:string) => {
    return await db.query.users.findFirst({
@@ -25,6 +26,10 @@ export const settingsServiceGet = async (id:string) => {
     })
 }
 
+export const disable2FaAuth = async (userId:string) => {
+    await db.update(users).set({ twoFactorEnabled: false, twoFactorSecret: generateTotpSecret() }).where(eq(users.id, userId))
+    return true
+}
 
 export const updateUserSettings = async (userId: string, data: updateData) => {
 return await db.transaction(async (tx) => {
@@ -36,10 +41,11 @@ return await db.transaction(async (tx) => {
         if (data.username) userUpdateData.username = data.username;
         if (data.phone) userUpdateData.phone = data.phone;
         if (data.twoFactorSecret) userUpdateData.twoFactorSecret = data.twoFactorSecret;
-        if (data.twoFactorEnabled) userUpdateData.twoFactorEnabled = data.twoFactorEnabled;
-        if (data.code) userUpdateData.code = data.code;
+        if (data.twoFactorEnabled) userUpdateData.twoFactorEnabled = data.twoFactorEnabled===true;
+        if (data.code) userUpdateData.code =   data.code;
 
-
+        
+        
         
         // Add other fields as needed
 
@@ -63,10 +69,11 @@ return await db.transaction(async (tx) => {
             if (!isMatch) {
                 throw new Error("Current password is incorrect");
             }
-
+            
             // Hash new password
             const newPasswordHash = await hashPassword(data.password.new);
-
+            
+            console.log(userUpdateData)
             // Update password in a separate operation
             await tx.update(passwords)
                 .set({
@@ -79,7 +86,7 @@ return await db.transaction(async (tx) => {
         // Update user data if there are changes
         if (Object.keys(userUpdateData).length > 0) {
             await tx.update(users)
-                .set(userUpdateData)
+                .set({...userUpdateData})
                 .where(eq(users.id, userId));
         }
 

@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
-import { settingsServiceGet, updateUserSettings } from "./settings.service.js";
+import { disable2FaAuth, settingsServiceGet, updateUserSettings } from "./settings.service.js";
 import {  OneUserServiceId } from "../users/users.service.js";
 import { verifyTotpCode } from "../utils/totp.js";
 
@@ -44,12 +44,15 @@ export const updateSettings = async (c: Context) => {
             return c.json({status:'error',message:'user not found',data:false},404)
         }
         const data = c.get('validatedData')
-
+        console.log(data)
         // check for otp and verification
         if (data.twoFactorSecretCode && verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {
-            if (user_exits.twoFactorEnabled && data.twoFactorEnabled) {
-                const results = await updateUserSettings(id, { twoFactorEnabled: data.twoFactorEnabled })
-                if (results.success) return c.json({ status: 'success', message: '2Fa disabled successfully',data:true })
+            if (user_exits.twoFactorEnabled && !data.twoFactorEnabled) {
+                console.log('one')
+                const results = await disable2FaAuth(id)
+                // const results = await updateUserSettings(id, { twoFactorEnabled: data.twoFactorEnabled })
+                console.log(results)
+                if (results) return c.json({ status: 'success', message: '2Fa disabled successfully',data:true })
                 return c.json({ status: 'error', message: '2Fa not disabled' ,data:false},400)
             }
             // if (user_exits.twoFactorEnabled) {
@@ -64,7 +67,7 @@ export const updateSettings = async (c: Context) => {
             }
         }
             else if (data.twoFactorSecretCode && !verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {
-            return c.json({ status: 'error', message: '2Fa not verified' ,data:false},400)
+            return c.json({ status: 'error', message: '2Fa not correct verified' ,data:false},400)
             
     }
   

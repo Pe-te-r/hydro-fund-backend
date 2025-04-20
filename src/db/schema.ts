@@ -158,6 +158,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
         references: [newBonus.userId],
     }),
     withdrawals: many(withdrawals),
+    orders:many(orders),
     referredUsers: many(referrals, { relationName: 'referrer' }),
     referredBy: many(referrals, { relationName: 'referred' }),
 }));

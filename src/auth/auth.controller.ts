@@ -2,6 +2,7 @@ import type { Context } from "hono";
 import { correct_password, email_exits, lastLoginUpdate, phone_exits, registerService, username_exits } from "./auth.service.js";
 // import type { SelectUser } from "../db/schema.js";
 import { generateUserToken } from "../utils/auth.js";
+import { mailer } from "../utils/mailer.js";
 
 export const register_controller = async (c: Context) => {
     try {
@@ -21,14 +22,15 @@ export const register_controller = async (c: Context) => {
 
         if (conflicts.length > 0) {
             return c.json({
-                status: 'error',
+            status: 'error',
                 message: `${conflicts.join(', ')} already exists`,
                 error: { conflicts } 
             }, 409);
         }
 
         const result = await registerService(data);
-        console.log(result)
+        await mailer.sendMail(data.email, 'register');
+
         if (result) {
             
             return c.json({

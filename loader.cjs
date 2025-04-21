@@ -1,5 +1,5 @@
-const loader = async = () => {
-    require('./src/index.ts')
+const loader = async () => {
+    await import('./src/index.ts')
 }
 
 loader()

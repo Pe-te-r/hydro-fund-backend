@@ -8,6 +8,7 @@
     "strict": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
+    "esModuleInterop": true, // Critical for Hono/ESM
     "types": [
       "node"
     ],

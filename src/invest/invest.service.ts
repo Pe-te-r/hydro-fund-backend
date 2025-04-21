@@ -19,15 +19,95 @@ const getOrderWithItems = async (orderId: string) => {
     });
 };
 
-// Get all orders for a user
+// // Get all orders for a user
 export const getUserOrders = async (userId: string) => {
-    return await db.query.orders.findMany({
+    // First fetch all orders with their items
+    const userOrders = await db.query.orders.findMany({
         where: eq(orders.userId, userId),
         with: {
             items: true
         },
         orderBy: desc(orders.createdAt),
     });
+
+    // Process each order to check if all items have completed their cycles
+    const processedOrders = await Promise.all(userOrders.map(async (order) => {
+        // Check if all items in this order have completed their cycles
+        const allItemsCompleted = order.items.every(item => {
+            const daysPassed = Math.floor((Date.now() - new Date(item.createdAt || '').getTime()) / (1000 * 60 * 60 * 24));
+            return daysPassed >= item.cycle;
+        });
+
+        // If all items are completed and order is still active, update it
+        if (allItemsCompleted && order.status === 'active') {
+            const [updatedOrder] = await db.update(orders)
+                .set({
+                    status: 'completed',
+                    updatedAt: new Date()
+                })
+                .where(eq(orders.id, order.id))
+                .returning();
+
+            return {
+                ...updatedOrder,
+                items: order.items
+            };
+        }
+
+        return order;
+    }));
+
+    return processedOrders;
+};
+
+export const claimOrder = async (orderId: string): Promise<boolean> => {
+    try {
+        await db.transaction(async (tx) => {
+            // 1. Get the order with its items
+            const order = await tx.query.orders.findFirst({
+                where: eq(orders.id, orderId),
+                with: { items: true }
+            });
+
+            if (!order) throw new Error('Order not found');
+            if (!order.userId) throw new Error('Order has no user associated'); // Add this check
+            if (order.claimed) throw new Error('Order already claimed');
+            if (order.status !== 'completed') throw new Error('Order not completed');
+
+            // 2. Calculate total earnings and fee
+            let totalEarnings = 0;
+
+            order.items.forEach(item => {
+                const itemEarnings = Number(item.cycle) * Number(item.dailyIncome) * item.quantity;
+                totalEarnings += itemEarnings;
+            });
+
+            const feeAmount = totalEarnings * 0.08;
+            const userEarnings = totalEarnings - feeAmount;
+
+            // 3. Update the order
+            await tx.update(orders)
+                .set({
+                    claimed: true,
+                    fee: (Number(order.fee) + feeAmount).toString(),
+                    updatedAt: new Date()
+                })
+                .where(eq(orders.id, orderId));
+
+            // 4. Update user balance - now we know order.userId exists
+            await tx.update(users)
+                .set({
+                    balance: sql`${users.balance} + ${userEarnings}`, // Better to use SQL expression
+                    // updatedAt: new Date()
+                })
+                .where(eq(users.id, order.userId)); // No optional chaining needed
+
+        });
+        return true;
+    } catch (error) {
+        console.error('Error claiming order:', error);
+        return false;
+    }
 };
 
 
@@ -49,6 +129,7 @@ export const saveOrderToDatabase = async (
                     userId: orderData.userId,
                     totalAmount: orderData.totalAmount.toString(), // Convert to string for decimal
                     status: 'active',
+                    // fee:0,
                 })
                 .returning({ id: orders.id });
 

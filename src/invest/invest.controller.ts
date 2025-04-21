@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { validate as isValidUUID } from 'uuid';
-import { getUserOrders, saveOrderToDatabase } from "./invest.service.js";
+import { claimOrder, getUserOrders, saveOrderToDatabase } from "./invest.service.js";
 import { OneUserServiceId } from "../users/users.service.js";
 
 export const getInvest = async(c:Context) => {
@@ -9,6 +9,29 @@ export const getInvest = async(c:Context) => {
     } catch (error) {
         console.log(error)
         return c.json({status:'error',message:'an error occured'},500)
+    }
+}
+
+export const getInvestClaim = async (c: Context) => {
+    try {
+        console.log('one')
+        const id = c.req.param('id')
+
+        if (!isValidUUID(id)) {
+            return c.json({ status: 'error', message: 'Invalid user ID format' }, 400);
+        }
+        console.log(id)
+
+        // const user_exits = await OneUserServiceId(id)
+        // if (!user_exits) {
+        //     return c.json({ status: 'error', message: 'user not found', data: false }, 404)
+        // }
+        const results = await claimOrder(id)
+        console.log(results)
+        if(results)return c.json({status:'success',message:'claimed done'},200)
+        return c.json({status:'error',message:'not claimed'},400)
+    } catch (error) {
+        return c.json({ status: 'error', message: 'an error occured' }, 500)
     }
 }
 

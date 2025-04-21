@@ -80,7 +80,8 @@ export const orders = pgTable('orders', {
     userId: uuid('user_id').references(() => users.id),
     totalAmount: decimal('total_amount', { precision: 19, scale: 4 }).notNull(),
     status: investmentStatusEnum('status').default('active'), // pending, completed, cancelled
-    claimed:boolean('claimed').default(false),
+    claimed: boolean('claimed').default(false),
+    fee: decimal('fee', { precision: 19, scale: 4 }).notNull().default('0'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });

@@ -12,59 +12,64 @@ export const registerService = async (user: {
     inviteCode?: string;
 }) => {
     try {
-        // Create the user first
-        const [newUser] = await db.insert(users)
-            .values({
-                username: user.username,
-                email: user.email,
-                phone: user.phone,
-                twoFactorSecret: generateTotpSecret(),
-                lastLogin: new Date(),
-                vipTier: 'standard',
-            })
-            .returning();
+        // Start a transaction for atomic operations
+        const newUser = await db.transaction(async (tx) => {
+            // Create the user first
+            const [createdUser] = await tx.insert(users)
+                .values({
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone,
+                    twoFactorSecret: generateTotpSecret(),
+                    lastLogin: new Date(),
+                    vipTier: 'standard',
+                })
+                .returning();
 
-        // Create password record
-        await db.insert(passwords)
-            .values({
-                userId: newUser.id,
-                password: await hashPassword(user.password),
-                lastChanged: new Date()
-            });
+            // Create password record
+            await tx.insert(passwords)
+                .values({
+                    userId: createdUser.id,
+                    password: await hashPassword(user.password),
+                    lastChanged: new Date()
+                });
 
-        // Enable bonus
-        await db.insert(newBonus).values({ userId: newUser.id });
+            // Enable bonus
+            await tx.insert(newBonus).values({ userId: createdUser.id });
 
-        // Handle referral if inviteCode exists
-        if (user.inviteCode) {
-            // First find the referrer by their referral code
-            const referrer = await db.query.referrals.findFirst({
-                where: eq(referrals.referralCode, user.inviteCode)
-            });
+            // Handle referral if inviteCode exists
+            if (user.inviteCode) {
+                // Find the referrer by their referral code
+                const referrer = await tx.query.referrals.findFirst({
+                    where: eq(referrals.referralCode, user.inviteCode)
+                });
 
-            if (referrer) {
-                // Create referral relationship
-                await db.insert(referrals)
-                    .values({
-                        referrerId: referrer.referrerId,
-                        referredId: newUser.id,
-                        referralCode: generateReferralCode(),
-                        bonusAmount: '50',
-                        bonusStatus: 'pending'
-                    });
+                if (referrer) {
+                    // Create referral relationship with actual referrer
+                    await tx.insert(referrals)
+                        .values({
+                            referrerId: referrer.referrerId,
+                            referredId: createdUser.id,
+                            referralCode: generateReferralCode(),
+                            bonusAmount: '50',
+                            bonusStatus: 'pending'
+                        });
+                }
             }
-        }
 
-        // Always generate a referral code for the new user
-        await db.insert(referrals)
-            .values({
-                referrerId: newUser.id,
-                referredId: newUser.id,
-                referralCode: generateReferralCode(),
-                bonusAmount: '0',
-                bonusStatus: 'completed',
-                isSelfReferral: true
-            });
+            // Always generate a referral code for the new user
+            await tx.insert(referrals)
+                .values({
+                    referrerId: createdUser.id,
+                    referredId: createdUser.id,
+                    referralCode: generateReferralCode(),
+                    bonusAmount: '0',
+                    bonusStatus: 'completed',
+                    isSelfReferral: true
+                });
+
+            return createdUser;
+        });
 
         return newUser;
     } catch (error) {

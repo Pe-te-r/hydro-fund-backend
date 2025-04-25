@@ -4,7 +4,6 @@ import { newBonus, passwords, referrals, users, vipTierEnum } from "../db/schema
 import { hashPassword, verifyPassword } from "../utils/hash.js";
 import { generateReferralCode } from "../utils/referral_code.js";
 import { generateTotpSecret } from "../utils/totp.js";
-
 export const registerService = async (user: {
     username: string;
     email: string;
@@ -13,73 +12,77 @@ export const registerService = async (user: {
     inviteCode?: string;
 }) => {
     try {
-        const result = await db.transaction(async (tx) => {
-            // Create the user first
-            const [newUser] = await tx.insert(users)
-                .values({                    
-                    username: user.username,
-                    email: user.email,
-                    phone: user.phone,
-                    twoFactorSecret: generateTotpSecret(),
-                    lastLogin: new Date(),
-                    vipTier: 'standard',
-                })
-                .returning();
+        // Create the user first
+        const [newUser] = await db.insert(users)
+            .values({
+                username: user.username,
+                email: user.email,
+                phone: user.phone,
+                twoFactorSecret: generateTotpSecret(),
+                lastLogin: new Date(),
+                vipTier: 'standard',
+            })
+            .returning();
 
-            // Create password record
-            await tx.insert(passwords)
-                .values({
-                    userId: newUser.id,
-                    password: await hashPassword(user.password),
-                    lastChanged: new Date()
-                });
-            
-            // enable bonus
-            await tx.insert(newBonus).values({userId:newUser.id})
-            
-            // Handle referral if inviteCode exists
-            if (user.inviteCode) {
-                // First find the referrer by their referral code
-                const referrer = await tx.query.referrals.findFirst({
-                    where: eq(referrals.referralCode, user.inviteCode)
-                });
+        // Create password record
+        await db.insert(passwords)
+            .values({
+                userId: newUser.id,
+                password: await hashPassword(user.password),
+                lastChanged: new Date()
+            });
 
-                if (referrer) {
-                    // Create referral relationship
-                    await tx.insert(referrals)
-                        .values({
-                            referrerId: referrer.referrerId, // The user who referred
-                            referredId: newUser.id,         // The new user
-                            referralCode: generateReferralCode(), // For the new user to refer others
-                            bonusAmount: '50',              // Default bonus
-                            bonusStatus: 'pending'          // Default status
-                        });
+        // Enable bonus
+        await db.insert(newBonus).values({ userId: newUser.id });
 
-                    // Optional: Update referrer's bonus (if immediate)
-                    // await tx.update(users)...
-                }
-            } else {
-                // Still generate a referral code for the new user
-                await tx.insert(referrals)
+        // Handle referral if inviteCode exists
+        if (user.inviteCode) {
+            // First find the referrer by their referral code
+            const referrer = await db.query.referrals.findFirst({
+                where: eq(referrals.referralCode, user.inviteCode)
+            });
+
+            if (referrer) {
+                // Create referral relationship
+                await db.insert(referrals)
                     .values({
-                        referrerId: newUser.id, // Self-referral or no referrer
+                        referrerId: referrer.referrerId,
                         referredId: newUser.id,
                         referralCode: generateReferralCode(),
-                        bonusAmount: '0',      // No bonus for self
-                        bonusStatus: 'completed', // No pending bonus
-                        isSelfReferral:true
+                        bonusAmount: '50',
+                        bonusStatus: 'pending'
                     });
             }
+        }
 
-            return newUser;
-        });
-        return result;
+        // Always generate a referral code for the new user
+        await db.insert(referrals)
+            .values({
+                referrerId: newUser.id,
+                referredId: newUser.id,
+                referralCode: generateReferralCode(),
+                bonusAmount: '0',
+                bonusStatus: 'completed',
+                isSelfReferral: true
+            });
+
+        return newUser;
     } catch (error) {
         console.error('Registration error:', error);
-        return false;
+
+        // Handle specific error cases
+        if (error instanceof Error) {
+            if (error.message.includes('unique constraint')) {
+                throw new Error('Username, email or phone already exists');
+            }
+            if (error.message.includes('violates foreign key constraint')) {
+                throw new Error('Invalid referral code');
+            }
+        }
+
+        throw new Error('Registration failed');
     }
 };
-
 
 
 export const email_exits = async (email:string) => {

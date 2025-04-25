@@ -8,6 +8,7 @@ export const register_controller = async (c: Context) => {
     try {
         const data = c.get('validatedData')
         const conflicts: string[] = [];
+        
 
         // Check each field and collect conflicts
         if ('email' in data && await email_exits(String(data.email))) {

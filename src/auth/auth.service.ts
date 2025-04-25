@@ -57,7 +57,19 @@ export const registerService = async (user: {
 
                     // Optional: Update referrer's bonus (if immediate)
                     // await tx.update(users)...
+                } else {
+                    // Still generate a referral code for the new user
+                    await tx.insert(referrals)
+                        .values({
+                            referrerId: newUser.id, // Self-referral or no referrer
+                            referredId: newUser.id,
+                            referralCode: generateReferralCode(),
+                            bonusAmount: '0',      // No bonus for self
+                            bonusStatus: 'completed', // No pending bonus
+                            isSelfReferral: true
+                        });
                 }
+                
             } else {
                 // Still generate a referral code for the new user
                 await tx.insert(referrals)

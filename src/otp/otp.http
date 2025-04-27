@@ -1,0 +1,7 @@
+POST http://localhost:3006/otp
+Content-Type: application/json
+
+{
+    "otp":"811757",
+    "email":"phantom8526@duck.com"
+}

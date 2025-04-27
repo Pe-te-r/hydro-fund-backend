@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            color: #2563eb;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .icon {
+            text-align: center;
+            font-size: 48px;
+            margin: 20px 0;
+            color: #2563eb;
+        }
+
+        .alert-box {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 25px 0;
+            font-size: 15px;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #075985;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white !important;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            line-height: 1.5;
+        }
+
+        .text-muted {
+            color: #94a3b8;
+        }
+
+        .details {
+            background-color: #f8fafc;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .details-item {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .details-label {
+            font-weight: 500;
+            min-width: 120px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="header">Password Changed Successfully</h1>
+        <div class="icon">🔑</div>
+
+        <p>Hello {{username}},</p>
+
+        <p>This is to confirm that your account password was successfully changed on <strong>
+                {{changeDate}}
+            </strong>.</p>
+
+        <div class="alert-box">
+            <div class="alert-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                        stroke="#075985" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Security Notice
+            </div>
+            If you didn't make this change, please contact our support team immediately as your account may be
+            compromised.
+        </div>
+
+        <div class="details">
+            <div class="details-item">
+                <span class="details-label">Changed from:</span>
+                <span>{{device}} ({{ip}})</span>
+            </div>
+            <div class="details-item">
+                <span class="details-label">Location:</span>
+                <span>{{location}}</span>
+            </div>
+            <div class="details-item">
+                <span class="details-label">Browser:</span>
+                <span>{{browser}}</span>
+            </div>
+        </div>
+
+        <p>For your security, we recommend:</p>
+        <ul style="margin-top: 0; padding-left: 20px;">
+            <li>Using a strong, unique password</li>
+            <li>Enabling two-factor authentication</li>
+            <li>Updating passwords every 3-6 months</li>
+        </ul>
+
+        <center>
+            <a href="#" class="button">Review Account Security</a>
+        </center>
+
+        <div class="footer">
+            <p>This email was sent to notify you of important changes to your account.</p>
+            <p class="text-muted">If you believe this was sent in error, please ignore this message.</p>
+            <p>&copy;
+                <script>document.write(new Date().getFullYear())</script> Your Company. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

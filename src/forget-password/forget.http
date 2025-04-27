@@ -1,0 +1,17 @@
+POST http://localhost:3006/forget
+Content-Type: application/json
+
+{
+    "email":"phantom8526@duck.com"
+}
+
+###
+POST http://localhost:3006/forget/new
+Content-Type: application/json
+
+{
+    "code":"5401",
+    "password":"87654321",
+    "email":"phantom8526@duck.com"
+}
+

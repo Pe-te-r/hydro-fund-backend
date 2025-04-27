@@ -13,6 +13,7 @@ import { withdraw_route } from './withdraw/withdraw.route.js'
 import { investApi } from './invest/invest.route.js'
 import { otpRoute } from './otp/otp.route.js'
 import { forgetPassword } from './forget-password/forget.route.js'
+import { depositRoute } from './deposit/deposit.route.js'
 
 
 
@@ -31,6 +32,7 @@ app.route('/', withdraw_route)
 app.route('/', investApi)
 app.route('/', otpRoute)
 app.route('/', forgetPassword)
+app.route('/', depositRoute)
 
 
 

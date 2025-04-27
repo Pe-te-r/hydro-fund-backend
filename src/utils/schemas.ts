@@ -88,6 +88,13 @@ export const withdrawData = z.object({
     admin_info:z.string().optional(),
 })
 
+export const depositData = z.object({
+    userId: z.string(),
+    amount: z.number(),
+    phone: z.string(),
+    code:z.string()
+    
+})
 
 
 const OrderItemSchema = z.object({
@@ -113,6 +120,12 @@ export const updateUserStatus = z.object({
 // Type derived from the schema
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 
+export type depositDataType = {
+    amount:number,
+    phone: string,
+    userId:string,
+    code: string
+}
 
 export type infoEmail = {
         template: string;

@@ -75,16 +75,16 @@ export const updateSettings = async (c: Context) => {
                 const results = await disable2FaAuth(id)
                 // const results = await updateUserSettings(id, { twoFactorEnabled: data.twoFactorEnabled })
                 console.log(results)
-                if (results) return c.json({ status: 'success', message: '2Fa disabled successfully', data: true })
+                if (results) {
+                    await mailer.sendMail(user_exits.email, 'disable', { username: user_exits.username });
+                    return c.json({ status: 'success', message: '2Fa disabled successfully', data: true })
+                }
                 return c.json({ status: 'error', message: '2Fa not disabled', data: false }, 400)
             }
-            // if (user_exits.twoFactorEnabled) {
-            //     return c.json({ status: 'success', message:'otp verified'})
-            // }
             if (!user_exits.twoFactorEnabled) {
                 const results = await updateUserSettings(id, { twoFactorEnabled: true, }, emailData)
                 if (results.success) {
-                    await mailer.sendMail(user_exits.email, '2fa');
+                    await mailer.sendMail(user_exits.email, '2fa',{username:user_exits.username});
                     return c.json({ status: 'success', message: '2Fa enabled successfully', data: true })
                 }
                 return c.json({ status: 'error', message: '2Fa not enabled', data: false }, 400)

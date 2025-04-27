@@ -1,0 +1,15 @@
+POST http://localhost:3006/deposit
+Content-Type: application/json
+
+{
+    "userId":"b352f7ac-f212-4008-aa59-d250e74688c7",
+    "amount":1000,
+    "code":"htppcdwe823",
+    "phone":"0768543269"
+}
+
+###
+GET http:localhost:3006/deposit
+
+###
+PATCH  http:localhost:3006/deposit/dec35e24-23fe-4a4e-9d1d-086abc5af1ff

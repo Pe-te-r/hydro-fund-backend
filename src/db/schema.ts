@@ -43,20 +43,22 @@ export const users = pgTable('users', {
 });
 
 export const passwords = pgTable('passwords', {
+    id: uuid('id').defaultRandom().primaryKey(),  
     userId: uuid('id').primaryKey().references(() => users.id),
     password: text('password').notNull(),
     resetTokenExpires: integer('reset_token_expires'),
     lastChanged: timestamp('last_changed').defaultNow(),
 });
 
-// export const deposit = pgTable('deposit', {
-//     userId: uuid('id').primaryKey().references(() => users.id),
-//     amount: decimal('amount', { precision: 19, scale: 4 }).default('0'),
-//     phone: varchar('phone', { length: 256 }).notNull().unique(),
-//     status: withdrawalStatusEnum('status').default('pending'),
-//     createdAt: timestamp('created_at').defaultNow(),
-
-// })
+export const deposit = pgTable('deposit', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('userid').references(() => users.id),
+    amount: decimal('amount', { precision: 19, scale: 4 }).default('0'),
+    phone: varchar('phone', { length: 256 }).notNull(),
+    status: withdrawalStatusEnum('status').default('pending'),
+    code: varchar('code').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+})
 
 
 
@@ -173,6 +175,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     }),
     withdrawals: many(withdrawals),
     orders: many(orders),
+    deposits:many(deposit),
     referredUsers: many(referrals, { relationName: 'referrer' }),
     referredBy: many(referrals, { relationName: 'referred' }),
 }));
@@ -230,5 +233,13 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
     order: one(orders, {
         fields: [orderItems.orderId],
         references: [orders.id],
+    }),
+}));
+
+// deposit claim
+export const depositRelations = relations(deposit, ({ one }) => ({
+    user: one(users, {
+        fields: [deposit.userId],
+        references: [users.id],
     }),
 }));

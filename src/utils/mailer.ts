@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Types for our email templates
-type TemplateType = 'register' | 'code' | '2fa' | 'forget' | 'password_changed';
+type TemplateType = 'register' | 'code' | '2fa' | 'forget' | 'disable';
 
 // Enhanced email data interface
 interface EmailData {
@@ -124,6 +124,7 @@ export class Mailer {
                 register: 'Welcome to Our Platform!',
                 code: 'Your Verification Code',
                 '2fa': 'Two-Factor Authentication Notification',
+                'disable': 'Two-Factor Authentication Disabled',
                 forget: 'Password Reset Confirmation',
                 password_changed: 'Your Password Has Been Changed'
             };

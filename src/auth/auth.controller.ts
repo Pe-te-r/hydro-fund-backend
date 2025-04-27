@@ -79,6 +79,6 @@ export const login_controller = async (c: Context) => {c
         return c.json({status:'error','message':'wrong password'},401)
     } catch(error) {
         console.log(error)
-        return c.json({ 'error':'error'},500)
+        return c.json({ status:'error',message:'an error occured'},500)
     }
 }

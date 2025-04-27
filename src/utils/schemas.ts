@@ -89,11 +89,11 @@ export const withdrawData = z.object({
 })
 
 export const depositData = z.object({
-    userId: z.string(),
-    amount: z.number(),
-    phone: z.string(),
-    code:z.string()
-    
+userId: z.string(),
+amount: z.string(),
+phone: z.string(),
+code:z.string()
+
 })
 
 

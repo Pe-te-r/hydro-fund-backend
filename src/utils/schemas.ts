@@ -9,6 +9,27 @@ export const registerSchema = z.object({
     
 });
 
+export const otpSchema = z.object({
+    otp: z.string(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    username:z.string().optional(),
+    id:z.string().optional()
+})
+
+export const newPasswordSchema = z.object({
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    username:z.string().optional(),
+    password:z.string()
+})
+
+export const forgetSchema = z.object({
+    username: z.string().optional(),
+    phone: z.string().optional(),
+    email:z.string().optional(),
+})
+
 export const loginSchema = z.union([
     z.object({ username: z.string(), password: z.string() }),
     z.object({ phone: z.string(), password: z.string() }),

@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import 'dotenv/config'
 import { users_api } from './users/users.route.js'
 import { auth_api } from './auth/auth.route.js'
-import 'dotenv/config'
 import { cors } from 'hono/cors'
 import { bonusApi } from './bonus/bonus.route.js'
 import { settingsApi } from './settings/settings.route.js'
@@ -11,6 +11,8 @@ import { dashboardApi } from './dashboard/dashboard.route.js'
 import { adminUsersApi } from './admin/users/users.route.js'
 import { withdraw_route } from './withdraw/withdraw.route.js'
 import { investApi } from './invest/invest.route.js'
+import { otpRoute } from './otp/otp.route.js'
+import { forgetPassword } from './forget-password/forget.route.js'
 
 
 
@@ -27,6 +29,8 @@ app.route('/', dashboardApi)
 app.route('/', adminUsersApi)
 app.route('/', withdraw_route)
 app.route('/', investApi)
+app.route('/', otpRoute)
+app.route('/', forgetPassword)
 
 
 

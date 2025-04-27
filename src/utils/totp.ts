@@ -8,6 +8,7 @@ authenticator.options = {
     HashAlgorithms: 'SHA1', // HMAC algorithm
 };
 
+
 /**
  * Generate a new TOTP secret for a user.
  * @returns {string} A base32-encoded secret key
@@ -23,7 +24,8 @@ export function generateTotpSecret(): string {
  * @returns {boolean} True if valid, false otherwise
  */
 export function verifyTotpCode(secret: string, token: string): boolean {
-    return authenticator.check(token, secret);
+
+    return authenticator.verify({ token, secret });
 }
 
 

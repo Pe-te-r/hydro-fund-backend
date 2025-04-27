@@ -82,7 +82,7 @@ export const claimOrder = async (orderId: string): Promise<boolean> => {
                 totalEarnings += itemEarnings;
             });
 
-            const feeAmount = totalEarnings * 0.08;
+            const feeAmount = totalEarnings * 0.1;
             const userEarnings = totalEarnings - feeAmount;
 
             // 3. Update the order

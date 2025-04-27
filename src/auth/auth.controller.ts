@@ -30,9 +30,10 @@ export const register_controller = async (c: Context) => {
         }
 
         const result = await registerService(data);
-        await mailer.sendMail(data.email, 'register');
-
+        console.log(result)
+        
         if (result) {
+            await mailer.sendMail(data.email, 'register', { username: result.username });
             
             return c.json({
                 status: 'success',

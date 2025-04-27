@@ -2,25 +2,40 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import handlebars from 'handlebars';
-
 import { fileURLToPath } from 'url';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 // Types for our email templates
-type TemplateType = 'register' | 'code' | '2fa';
+type TemplateType = 'register' | 'code' | '2fa' | 'forget' | 'password_changed';
+
+// Enhanced email data interface
+interface EmailData {
+    username: string; // Always required
+    email?: string;
+    changeDate?: string;
+    location?: string;
+    ip?: string;
+    device?: string;
+    browser?: string;
+    supportEmail?: string;
+    contactPhone?: string;
+    code?: string; // For backward compatibility
+}
 
 // Email configuration interface
 interface MailConfig {
     host: string;
     port: number;
-    secure: boolean; // true for 465, false for other ports
+    secure: boolean;
     auth: {
         user: string;
         pass: string;
     };
-    from: string; // sender address
+    from: string;
+    defaultSupportEmail?: string;
+    defaultContactPhone?: string;
 }
 
 // Response interface for sending emails
@@ -31,13 +46,17 @@ interface SendMailResponse {
     messageId?: string;
 }
 
-// Initialize mailer with configuration
 export class Mailer {
     private transporter: nodemailer.Transporter;
     private config: MailConfig;
 
     constructor(config: MailConfig) {
-        this.config = config;
+        this.config = {
+            ...config,
+            defaultSupportEmail: config.defaultSupportEmail || 'support@yourdomain.com',
+            defaultContactPhone: config.defaultContactPhone || '+1 (555) 123-4567'
+        };
+
         this.transporter = nodemailer.createTransport({
             host: config.host,
             port: config.port,
@@ -45,7 +64,6 @@ export class Mailer {
             auth: config.auth,
         });
 
-        // Verify connection configuration
         this.transporter.verify((error) => {
             if (error) {
                 console.error('SMTP connection verification failed:', error);
@@ -55,14 +73,12 @@ export class Mailer {
         });
     }
 
-    // Method to send email with proper success/failure tracking
     public async sendMail(
         to: string,
         templateType: TemplateType,
-        code?: string
+        data?: EmailData | string // Accepts either full data object or just code (for backward compatibility)
     ): Promise<SendMailResponse> {
         try {
-            // Load the appropriate template
             const templatePath = path.join(
                 __dirname,
                 '../templates',
@@ -76,33 +92,46 @@ export class Mailer {
             const templateSource = fs.readFileSync(templatePath, 'utf8');
             const template = handlebars.compile(templateSource);
 
-            // Prepare template data
-            const templateData = { code };
+            // Normalize the data parameter
+            let templateData: EmailData;
 
-            // Generate HTML
+            if (typeof data === 'string') {
+                // Backward compatibility for code-only emails
+                templateData = {
+                    username: 'User', // Default username
+                    code: data
+                };
+            } else {
+                // Enhanced email data
+                templateData = {
+                    username: data?.username || 'User',
+                    email: data?.email || to, // Use recipient email if not provided
+                    changeDate: data?.changeDate || new Date().toLocaleString(),
+                    location: data?.location || 'Unknown location',
+                    ip: data?.ip || 'Unknown IP',
+                    device: data?.device || 'Unknown device',
+                    browser: data?.browser || 'Unknown browser',
+                    supportEmail: data?.supportEmail || this.config.defaultSupportEmail,
+                    contactPhone: data?.contactPhone || this.config.defaultContactPhone,
+                    code: data?.code
+                };
+            }
+
             const html = template(templateData);
 
             // Determine subject based on template type
-            let subject: string;
-            switch (templateType) {
-                case 'register':
-                    subject = 'Welcome to Our Platform!';
-                    break;
-                case 'code':
-                    subject = 'Your Verification Code';
-                    break;
-                case '2fa':
-                    subject = '2FA Has Been Enabled';
-                    break;
-                default:
-                    subject = 'Notification from Our Platform';
-            }
+            const subjects = {
+                register: 'Welcome to Our Platform!',
+                code: 'Your Verification Code',
+                '2fa': 'Two-Factor Authentication Notification',
+                forget: 'Password Reset Confirmation',
+                password_changed: 'Your Password Has Been Changed'
+            };
 
-            // Send email and get the response
             const info = await this.transporter.sendMail({
                 from: this.config.from,
                 to,
-                subject,
+                subject: subjects[templateType] || 'Notification from Our Platform',
                 html,
             });
 
@@ -126,7 +155,7 @@ export class Mailer {
     }
 }
 
-// Example configuration (should come from environment variables in production)
+// Updated configuration with default support contacts
 const mailConfig: MailConfig = {
     host: process.env.SMTP_HOST || '',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -135,9 +164,9 @@ const mailConfig: MailConfig = {
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
     },
-    // from: process.env.SMTP_FROM || '"Your App Name" <no-reply@example.com>',
-    from: process.env.SMTP_FROM  || ''
+    from: process.env.SMTP_FROM || '"Your App Name" <no-reply@example.com>',
+    defaultSupportEmail: process.env.SUPPORT_EMAIL || 'support@yourdomain.com',
+    defaultContactPhone: process.env.SUPPORT_PHONE || '+1 (555) 123-4567'
 };
 
-// Create a singleton instance of the mailer
 export const mailer = new Mailer(mailConfig);

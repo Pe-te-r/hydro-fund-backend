@@ -93,18 +93,18 @@ export const updateSettings = async (c: Context) => {
             }
         }
         else if (data.twoFactorSecretCode && !verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {
-            return c.json({ status: 'error', message: '2Fa not correct verified', data: false }, 400)
+            return c.json({ status: 'error', message: '2Fa code not verified', data: false }, 400)
 
         }
 
         const results = await updateUserSettings(id, data, emailData)
 
 
-        if (results.success === false) return c.json({ status: 'error', message: 'data not update', data: false }, 403)
-        return c.json({ status: true, message: 'data update successfully', data: true }, 200)
+        if (results.success === false) return c.json({ status: 'error', message:results.message, data: false }, 403)
+        return c.json({ status: true, message: " update successfully", data: true }, 200)
 
     } catch (error) {
-        // console.log(error)
-        return c.json({ status: 'error', message: 'unknow error occured' }, 500)
+
+        return c.json({ status: 'error', message: error instanceof Error ? error.message : 'unknow error occured' }, 500)
     }
 }

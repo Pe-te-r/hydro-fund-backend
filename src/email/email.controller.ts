@@ -24,7 +24,7 @@ export const send_email = async (c:Context) => {
         const code = generateRandomCode()
         const results = await updateUserSettings(id, { code })
         if (results.success) {
-            const sendEmailResult = await mailer.sendMail(user_exits.email, 'code', code);
+            const sendEmailResult = await mailer.sendMail(user_exits.email, 'code', {code:code,username:user_exits.username});
             console.log(sendEmailResult)
             if (!sendEmailResult.success) {
                 // console.error('Email failed to send:', sendEmailResult.message);

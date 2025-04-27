@@ -6,7 +6,7 @@ import { baseAuth } from "../utils/auth.js";
 
 export const settingsApi = new Hono().basePath('/settings')
 
-settingsApi.use(baseAuth())
+// settingsApi.use(baseAuth())
 
 settingsApi.get('/:id', settingsController)
 settingsApi.patch('/:id', validate(updateDetails),  updateSettings)

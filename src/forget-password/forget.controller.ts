@@ -28,7 +28,7 @@ export const forgetPasswordController = async (c: Context) => {
         const code = generateRandomCode()
         const results = await updateUserSettings(user_exits.id, { code })
         if (results.success) {
-            const sendEmailResult = await mailer.sendMail(user_exits.email, 'code', code);
+            const sendEmailResult = await mailer.sendMail(user_exits.email, 'code', {code:code,username:user_exits.username},);
             if (!sendEmailResult.success) {
                 return c.json({status:'error',message:'code not sent',data:false})
             } else {

@@ -33,7 +33,7 @@ export const disable2FaAuth = async (userId:string) => {
 }
 
 export const
-    updateUserSettings = async (userId: string, data: updateData, emailData: infoEmail) => {
+    updateUserSettings = async (userId: string, data: updateData, emailData?: infoEmail) => {
 return await db.transaction(async (tx) => {
     try {
         // Prepare user update data (excluding password)
@@ -90,8 +90,7 @@ return await db.transaction(async (tx) => {
                     lastChanged: new Date()
                 })
                 .where(eq(passwords.userId, userId));
-            
-            await mailer.sendMail(currentPassword.user.email, 'forget', {...emailData.data});
+            if(emailData)await mailer.sendMail(currentPassword.user.email, 'forget', {...emailData?.data});
             
         }
 

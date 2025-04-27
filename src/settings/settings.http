@@ -1,11 +1,10 @@
 GET http://localhost:3000/settings/773c8ea0-97de-4b34-9113-0195b0e8b770
 
 ###
-PATCH   http://localhost:3000/settings/773c8ea0-97de-4b34-9113-0195b0e8b770
+PATCH   http://localhost:3006/settings/b352f7ac-f212-4008-aa59-d250e74688c7
 Content-Type: application/json
 
 {
-    "phone":"0741195000",
     "password":{
         "old":"12345678",
         "new":"peter1234"

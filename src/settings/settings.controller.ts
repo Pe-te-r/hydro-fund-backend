@@ -4,6 +4,8 @@ import { disable2FaAuth, settingsServiceGet, updateUserSettings } from "./settin
 import { OneUserServiceId } from "../users/users.service.js";
 import { verifyTotpCode } from "../utils/totp.js";
 import { mailer } from "../utils/mailer.js";
+import { getBrowser, getDeviceType, getLocationFromIp } from "../forget-password/forget.controller.js";
+
 
 
 export const settingsController = async (c: Context) => {
@@ -34,6 +36,11 @@ export const updateSettings = async (c: Context) => {
     try {
         const id = c.req.param('id')
 
+        // Get additional security info from request
+        const ip = c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'Unknown IP';
+        const userAgent = c.req.header('user-agent') || 'Unknown browser';
+        const location = await getLocationFromIp(ip); // You'll need to implement this
+
         if (!isValidUUID(id)) {
             return c.json(
                 { status: 'error', message: 'Invalid user ID format' }, 400
@@ -45,6 +52,21 @@ export const updateSettings = async (c: Context) => {
             return c.json({ status: 'error', message: 'user not found', data: false }, 404)
         }
         const data = c.get('validatedData')
+        const emailData = {
+            template: 'password_changed',
+            to: user_exits.email,    
+            data: {
+                username: user_exits.username,
+                email: user_exits.email,
+                changeDate: new Date().toLocaleString(),
+                location: location || 'Unknown location',
+                ip: ip,
+                device: getDeviceType(userAgent), // Implement this helper
+                browser: getBrowser(userAgent),   // Implement this helper
+                supportEmail: 'support@yourdomain.com',
+                contactPhone: '+1 (555) 123-4567'
+            }
+        };
         console.log(data)
         // check for otp and verification
         if (data.twoFactorSecretCode && verifyTotpCode(user_exits.twoFactorSecret, data.twoFactorSecretCode)) {
@@ -60,7 +82,7 @@ export const updateSettings = async (c: Context) => {
             //     return c.json({ status: 'success', message:'otp verified'})
             // }
             if (!user_exits.twoFactorEnabled) {
-                const results = await updateUserSettings(id, { twoFactorEnabled: true, })
+                const results = await updateUserSettings(id, { twoFactorEnabled: true, }, emailData)
                 if (results.success) {
                     await mailer.sendMail(user_exits.email, '2fa');
                     return c.json({ status: 'success', message: '2Fa enabled successfully', data: true })
@@ -75,7 +97,7 @@ export const updateSettings = async (c: Context) => {
 
         }
 
-        const results = await updateUserSettings(id, data)
+        const results = await updateUserSettings(id, data, emailData)
 
 
         if (results.success === false) return c.json({ status: 'error', message: 'data not update', data: false }, 403)

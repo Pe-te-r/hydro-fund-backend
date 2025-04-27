@@ -54,9 +54,6 @@ export const registerService = async (user: {
                             bonusAmount: '50',              // Default bonus
                             bonusStatus: 'pending'          // Default status
                         });
-
-                    // Optional: Update referrer's bonus (if immediate)
-                    // await tx.update(users)...
                 } else {
                     await tx.insert(referrals)
                         .values({

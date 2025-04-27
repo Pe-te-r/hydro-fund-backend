@@ -112,3 +112,20 @@ export const updateUserStatus = z.object({
 
 // Type derived from the schema
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
+
+
+export type infoEmail = {
+        template: string;
+        to: string;
+        data: {
+            username: string;
+            email: string;
+            changeDate: string;
+            location: string;
+            ip: string;
+            device: string;
+            browser: string;
+            supportEmail: string;
+            contactPhone: string;
+        };
+}

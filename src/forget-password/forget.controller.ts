@@ -113,7 +113,7 @@ export const changePasswordController = async (c: Context) => {
 };
 
 // Helper functions (implement these or use libraries)
-async function getLocationFromIp(ip: string): Promise<string> {
+export async function getLocationFromIp(ip: string): Promise<string> {
     try {
         // Clean IP if multiple IPs are forwarded
         const cleanIp = ip.split(',')[0].trim();
@@ -135,7 +135,7 @@ async function getLocationFromIp(ip: string): Promise<string> {
 }
 
 
-function getDeviceType(userAgent: string): string {
+export function getDeviceType(userAgent: string): string {
     // Simple device detection
     if (/mobile/i.test(userAgent)) return 'Mobile';
     if (/tablet/i.test(userAgent)) return 'Tablet';
@@ -143,7 +143,7 @@ function getDeviceType(userAgent: string): string {
     return 'Unknown device';
 }
 
-function getBrowser(userAgent: string): string {
+export function getBrowser(userAgent: string): string {
     // Simple browser detection
     if (/chrome/i.test(userAgent)) return 'Chrome';
     if (/firefox/i.test(userAgent)) return 'Firefox';

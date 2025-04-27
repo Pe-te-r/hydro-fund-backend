@@ -2,8 +2,9 @@ import { eq } from "drizzle-orm"
 import { db } from "../db/db.js"
 import { passwords, users } from "../db/schema.js"
 import { hashPassword, verifyPassword } from "../utils/hash.js";
-import { type updateData } from "../utils/schemas.js"
+import { type infoEmail, type updateData } from "../utils/schemas.js"
 import { generateTotpSecret } from "../utils/totp.js";
+import { mailer } from "../utils/mailer.js";
 
 export const settingsServiceGet = async (id:string) => {
    return await db.query.users.findFirst({
@@ -31,7 +32,8 @@ export const disable2FaAuth = async (userId:string) => {
     return true
 }
 
-export const updateUserSettings = async (userId: string, data: updateData) => {
+export const
+    updateUserSettings = async (userId: string, data: updateData, emailData: infoEmail) => {
 return await db.transaction(async (tx) => {
     try {
         // Prepare user update data (excluding password)
@@ -53,7 +55,14 @@ return await db.transaction(async (tx) => {
         if (data.password) {
             // Fetch current password hash
             const currentPassword = await tx.query.passwords.findFirst({
-                where: eq(passwords.userId, userId)
+                where: eq(passwords.userId, userId),
+                with: {
+                    user: {
+                        columns: {
+                            email:true
+                        }
+                    }
+                }
             });
 
             if (!currentPassword) {
@@ -81,6 +90,9 @@ return await db.transaction(async (tx) => {
                     lastChanged: new Date()
                 })
                 .where(eq(passwords.userId, userId));
+            
+            await mailer.sendMail(currentPassword.user.email, 'forget', {...emailData.data});
+            
         }
 
         // Update user data if there are changes

@@ -3,16 +3,16 @@ import { relations } from "drizzle-orm";
 
 // Enums for various status and type fields
 export const userStatusEnum = pgEnum('user_status', ['active', 'blocked', 'suspended']);
-export const vipTierEnum = pgEnum('vip_tier', ['standard','bronze', 'silver', 'gold', 'platinum']);
+export const vipTierEnum = pgEnum('vip_tier', ['standard', 'bronze', 'silver', 'gold', 'platinum']);
 export const paymentMethodEnum = pgEnum('payment_method', ['mpesa', 'paypal', 'crypto', 'bank_transfer']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['deposit', 'withdrawal', 'fee', 'bonus', 'investment', 'earning']);
-export const transactionStatusEnum = pgEnum('transaction_status', ['pending',"expired" ,'completed', 'failed', 'reversed']);
+export const transactionStatusEnum = pgEnum('transaction_status', ['pending', "expired", 'completed', 'failed', 'reversed']);
 export const investmentStatusEnum = pgEnum('investment_status', ['active', 'completed']);
 export const orderStatusEnum = pgEnum('order_status', ['pending', 'processing', 'completed', 'cancelled']);
 export const alertSeverityEnum = pgEnum('alert_severity', ['low', 'medium', 'high', 'critical']);
 export const alertStatusEnum = pgEnum('alert_status', ['open', 'investigating', 'resolved', 'false_positive']);
 export const productCategoryEnum = pgEnum('product_category', ['retail', 'wholesale', 'digital', 'service']);
-export const roleEnum = pgEnum('role',['admin','user'])
+export const roleEnum = pgEnum('role', ['admin', 'user'])
 export const withdrawalStatusEnum = pgEnum('withdrawal_status', [
     'pending',
     'completed',
@@ -34,7 +34,7 @@ export const users = pgTable('users', {
     role: roleEnum('role').default('user'),
     twoFactorEnabled: boolean('two_factor_secret_enable').default(false),
     vipTier: vipTierEnum('vip_tier'),
-    code:varchar('code'),
+    code: varchar('code'),
     totalInvested: decimal('total_invested', { precision: 19, scale: 4 }).default('0'),
     totalWithdrawn: decimal('total_withdrawn', { precision: 19, scale: 4 }).default('0'),
     createdAt: timestamp('created_at').defaultNow(),
@@ -55,8 +55,11 @@ export const passwords = pgTable('passwords', {
 //     phone: varchar('phone', { length: 256 }).notNull().unique(),
 //     status: withdrawalStatusEnum('status').default('pending'),
 //     createdAt: timestamp('created_at').defaultNow(),
-    
+
 // })
+
+
+
 
 
 export const referrals = pgTable('referrals', {
@@ -75,10 +78,10 @@ export const withdrawals = pgTable('withdrawals', {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     amount: decimal('amount', { precision: 19, scale: 4 }).notNull(),
-    netAmount: decimal('netAmount', {precision: 19, scale: 4}).notNull(),
+    netAmount: decimal('netAmount', { precision: 19, scale: 4 }).notNull(),
     fee: decimal('fee', { precision: 19, scale: 4 }).notNull(),
     phone: varchar('phone').notNull(),
-    admin_info:text('admin'),
+    admin_info: text('admin'),
     status: withdrawalStatusEnum('status').default('pending').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     processedAt: timestamp('process_at'),
@@ -169,7 +172,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
         references: [newBonus.userId],
     }),
     withdrawals: many(withdrawals),
-    orders:many(orders),
+    orders: many(orders),
     referredUsers: many(referrals, { relationName: 'referrer' }),
     referredBy: many(referrals, { relationName: 'referred' }),
 }));
@@ -209,7 +212,7 @@ export const withdrawalsRelations = relations(withdrawals, ({ one }) => ({
     user: one(users, {
         fields: [withdrawals.userId],
         references: [users.id],
-    }), 
+    }),
 }));
 
 

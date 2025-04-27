@@ -3,14 +3,14 @@ import { validate as isValidUUID } from 'uuid';
 import { claimOrder, getUserOrders, saveOrderToDatabase } from "./invest.service.js";
 import { OneUserServiceId } from "../users/users.service.js";
 
-export const getInvest = async(c:Context) => {
-    try {
-        return c.json({status:'success',message:'success retrival',data:'investements'})
-    } catch (error) {
-        console.log(error)
-        return c.json({status:'error',message:'an error occured'},500)
-    }
-}
+// export const getInvest = async(c:Context) => {
+//     try {
+//         return c.json({status:'success',message:'success retrival',data:'investements'})
+//     } catch (error) {
+//         console.log(error)
+//         return c.json({status:'error',message:'an error occured'},500)
+//     }
+// }
 
 export const getInvestClaim = async (c: Context) => {
     try {

@@ -16,6 +16,7 @@ export const getDashBoardService = async (id: string) => {
         columns: {
             username:true,
             balance: true,
+            deposit:true,
             totalInvested: true,
             status: true,
             totalWithdrawn: true,

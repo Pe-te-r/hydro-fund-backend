@@ -15,7 +15,6 @@ export const getDashboard = async (c: Context) => {
             return c.json({'status':'error','message':'user not found'})
         }
         const results = await getDashBoardService(id)
-        console.log(results)
         return c.json(results)
     } catch (error) {
         console.log(error)

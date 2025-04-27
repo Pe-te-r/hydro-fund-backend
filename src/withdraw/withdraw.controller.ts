@@ -18,7 +18,7 @@ export const widthdraw_route = async (c: Context) => {
         const amount = parseFloat(data.amount);
 
         // Validate the 8% fee calculation
-        const expectedFee = amount * 0.08;
+        const expectedFee = amount * 0.1;
         data.fee = expectedFee
         data.netAmount= amount-expectedFee
 

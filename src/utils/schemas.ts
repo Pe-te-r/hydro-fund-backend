@@ -17,6 +17,15 @@ export const otpSchema = z.object({
     id:z.string().optional()
 })
 
+export const codeSchema = z.object({
+    code: z.string(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    username: z.string().optional(),
+    id: z.string().optional()
+})
+
+
 export const newPasswordSchema = z.object({
     email: z.string().optional(),
     phone: z.string().optional(),

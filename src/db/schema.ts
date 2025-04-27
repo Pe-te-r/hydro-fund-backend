@@ -49,6 +49,16 @@ export const passwords = pgTable('passwords', {
     lastChanged: timestamp('last_changed').defaultNow(),
 });
 
+// export const deposit = pgTable('deposit', {
+//     userId: uuid('id').primaryKey().references(() => users.id),
+//     amount: decimal('amount', { precision: 19, scale: 4 }).default('0'),
+//     phone: varchar('phone', { length: 256 }).notNull().unique(),
+//     status: withdrawalStatusEnum('status').default('pending'),
+//     createdAt: timestamp('created_at').defaultNow(),
+    
+// })
+
+
 export const referrals = pgTable('referrals', {
     id: uuid('id').defaultRandom().primaryKey(),
     referrerId: uuid('referrer_id').notNull().references(() => users.id),

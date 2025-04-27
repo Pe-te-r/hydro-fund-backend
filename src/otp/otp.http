@@ -1,7 +1,7 @@
-POST http://localhost:3006/otp
+POST http://localhost:3006/verify/code
 Content-Type: application/json
 
 {
-    "otp":"811757",
+    "code":"2160",
     "email":"phantom8526@duck.com"
 }

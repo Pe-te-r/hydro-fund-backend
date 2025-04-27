@@ -32,7 +32,7 @@ export const forgetPasswordController = async (c: Context) => {
             if (!sendEmailResult.success) {
                 return c.json({status:'error',message:'code not sent',data:false})
             } else {
-                return c.json({status:'success',message:'Code sent to email',data:true})
+                return c.json({status:'success',message:'Code sent to email',data:{code:true}})
             }
         }
         return c.json({status:'errror',message:'try again code not sent to email',data:false},400)        
@@ -42,40 +42,6 @@ export const forgetPasswordController = async (c: Context) => {
         return c.json({status:'error',message:'an error occured'},500)
     }
 }
-
-// export const changePasswordController = async (c: Context) => {
-//     try {
-//         const data = c.get('validatedData')
-//         let user_exits = null;
-//         console.log(user_exits)
-//         if ('email' in data) {
-//             user_exits = await email_exits(String(data['email']))
-//         }
-//         if ('phone' in data) {
-//             user_exits = await phone_exits(String(data['phone']))
-//         }
-//         if ('username' in data) {
-//             user_exits = await username_exits(String(data['username']))
-//         }
-//         if (!user_exits) {
-//             return c.json({ 'status': 'error', 'message': 'user not found' }, 404)
-//         }
-//         let password = null
-//         if ('password' in data) {
-//             password = data['password']
-//         }
-//         if(!password)return c.json({status:'error',message:'password not sent'},400)
-//         const results = await changePasswordService(user_exits.id,password)
-//         if (results) {
-//             await mailer.sendMail(user_exits.email, 'forget');
-//             return c.json({status:'success',message:'password updated successfully'},200)
-//         }
-//         return c.json({status:'error',message:'password not updated try again'},400)
-//     } catch (error) {
-//         console.log(error)
-//         return c.json({status:'error',message:'an error occured'},500)
-//     }
-// }
 
 
 export const changePasswordController = async (c: Context) => {
@@ -124,7 +90,6 @@ export const changePasswordController = async (c: Context) => {
                     contactPhone: '+1 (555) 123-4567'
                 }
             };
-            console.log(emailData.data)
             await mailer.sendMail(user_exists.email, 'forget', {...emailData.data});
 
             return c.json({

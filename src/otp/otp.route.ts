@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { validate } from "../utils/validator.js";
-import { otpSchema } from "../utils/schemas.js";
-import { verifyOtp } from "./otp.controller.js";
+import { codeSchema, otpSchema } from "../utils/schemas.js";
+import { verifyCode, verifyOtp } from "./otp.controller.js";
 
-export const otpRoute = new Hono().basePath('/otp')
+export const otpRoute = new Hono().basePath('/verify')
 
-otpRoute.post('/', validate(otpSchema), verifyOtp)
+otpRoute.post('/otp', validate(otpSchema), verifyOtp)
+otpRoute.post('/code', validate(codeSchema), verifyCode)
 
